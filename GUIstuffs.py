@@ -54,7 +54,7 @@ def run():
     fig.tight_layout()
     canvas = FigureCanvasTkAgg(fig, master=window)
     canvas.get_tk_widget().grid(row=2, columnspan=5)
-    Label(window, text=msg, font=("Ariel", 10), fg="red").grid(row=3, sticky=NE)
+    Label(window, text=msg, font=("Times", 10), fg="red").grid(row=3, sticky=NE)
     canvas.draw()
 
 
@@ -93,7 +93,7 @@ setOrder.configure(font=("Times"))
 setOrder.grid(row=1, column=3)
 
 
-fig = Figure(figsize=(7, 7))
+fig = Figure(figsize=(6.5, 6.5))
 canvas = FigureCanvasTkAgg(fig, master=window)
 
 # RUN button
