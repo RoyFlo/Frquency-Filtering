@@ -20,3 +20,19 @@ class Filters:
         print("Filter = ", filter)
         print("Cutoff = ", cutoff)
         print("Order = ", order)
+
+    def DFT(self):
+        print("**DFT**")
+
+        img = self.image
+
+        # 1. Compute the fft of the image
+        f = np.fft.fft2(img)
+
+        # 2. shift the fft to center the low frequencies
+        fshift = np.fft.fftshift(f)
+
+        # Magnitude of DFT
+        magnitude_dft = 20 * np.log(np.abs(fshift))
+
+        return magnitude_dft

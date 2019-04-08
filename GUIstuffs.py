@@ -42,15 +42,20 @@ def run():
     cutoff = setCutoff.get()
     order = setOrder.get()
 
-    obj = Filters(img, filter, cutoff, order)
-
-
     image = imread(img, as_gray=True)
     msg = "**SOMETHING GOES HERE**"
+
+    obj = Filters(image, filter, cutoff, order)
+    out = obj.DFT()
+    print("OUT: ", out)
 
     a1 = fig.add_subplot(221)
     a1.imshow(image, cmap=plt.cm.Greys_r)
     a1.set_title("Original Image")
+
+    a2 = fig.add_subplot(222)
+    a2.imshow(out, cmap=plt.cm.Greys_r)
+    a2.set_title("Magnitude DFT")
 
     fig.tight_layout()
     canvas = FigureCanvasTkAgg(fig, master=window)
