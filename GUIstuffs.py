@@ -22,8 +22,9 @@ Label(window, text="4. Enter Order", font=("Ariel", 12), fg="blue").grid(row=0, 
 
 # Sets the defualts of the program
 img = "Image1.png"
-filter = "Filter 1"
-print("Default image is " + img + " and will filter using " + filter)
+filter = "Ideal High Pass"
+print("Default image is: " + img)
+print("Default filter is: " + filter)
 
 # Changes the test phantoms to be simulated
 def iValue(value):
@@ -39,6 +40,7 @@ def fValue(value):
 
 def run():
 
+    print("***RUNNING***")
     cutoff = setCutoff.get()
     order = setOrder.get()
     print("Image = ", img)
@@ -48,8 +50,8 @@ def run():
 
 
 iList = ["Image1", "Image2", "Image3", "Image4", "Image5", "Image6"]
-sList = [1,2,3,4,5,6,7,8,9,10]
-filterList = ["Filter 1", "Filter 2"]
+filterList = ["Ideal High Pass", "Ideal Low Pass", "Gaussian High Pass", "Gaussian Low Pass", "Butterworth High Pass",
+              "Butterworth Low Pass"]
 
 # Image
 var1 = StringVar()
@@ -57,7 +59,7 @@ var1.set("Image1")
 
 # Filter
 var2 = StringVar()
-var2.set("Filter 1")
+var2.set("Ideal High Pass")
 
 # Cutoff
 var3 = StringVar()
@@ -82,11 +84,10 @@ setOrder = Entry(window, textvariable=var4)
 setOrder.grid(row=1, column=3)
 
 
-#print(img, filter, order, cutoff)
-
 fig = Figure(figsize=(7, 7))
 
-button1 = Button(window, text="**RUN**", bg="red", command=run)
-button1.grid(row=1, column=5)
+# RUN button
+button1 = Button(window, text="**RUN**", bg="red", font=("Ariel", 12), command=run)
+button1.grid(row=1, column=5, padx=30, pady=15)
 
 window.mainloop()
