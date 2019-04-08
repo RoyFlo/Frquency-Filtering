@@ -6,6 +6,8 @@ from matplotlib.figure import Figure
 from skimage.io import imread
 import skimage.transform as skt
 
+from Filters import Filters
+
 #Creates and sets the size of the GUI window
 window = Tk()
 window.geometry("820x820")
@@ -39,10 +41,9 @@ def run():
     print("***RUNNING***")
     cutoff = setCutoff.get()
     order = setOrder.get()
-    print("Image = ", img)
-    print("Filter = ", filter)
-    print("Cutoff = ", cutoff)
-    print("Order = ", order)
+
+    obj = Filters(img, filter, cutoff, order)
+
 
     image = imread(img, as_gray=True)
     msg = "**SOMETHING GOES HERE**"
@@ -54,7 +55,7 @@ def run():
     fig.tight_layout()
     canvas = FigureCanvasTkAgg(fig, master=window)
     canvas.get_tk_widget().grid(row=2, columnspan=5)
-    Label(window, text=msg, font=("Ariel", 10), fg="red").grid(row=3, sticky=NE)
+    Label(window, text=msg, font=("Times", 10), fg="red").grid(row=3, sticky=NE)
     canvas.draw()
 
 
@@ -93,7 +94,7 @@ setOrder.configure(font=("Times"))
 setOrder.grid(row=1, column=3)
 
 
-fig = Figure(figsize=(7, 7))
+fig = Figure(figsize=(6.5, 6.5))
 canvas = FigureCanvasTkAgg(fig, master=window)
 
 # RUN button
