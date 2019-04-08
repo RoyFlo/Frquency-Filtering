@@ -92,13 +92,23 @@ def run():
     obj = Filters(image, filter, cutoff, order)
     out = obj.DFT()
 
+    # Image display
     a1 = fig.add_subplot(221)
     a1.imshow(image, cmap=plt.cm.Greys_r)
     a1.set_title("Original Image")
 
+    # DFT graph
     a2 = fig.add_subplot(222)
     a2.imshow(out, cmap=plt.cm.Greys_r)
     a2.set_title("Magnitude DFT")
+
+    # Mask graph
+    a3 = fig.add_subplot(223)
+    a3.set_title("Mask")
+
+    # Resulting Image display
+    a4 = fig.add_subplot(224)
+    a4.set_title("Filtered Image")
 
     fig.tight_layout()
     canvas = FigureCanvasTkAgg(fig, master=window)
@@ -108,7 +118,7 @@ def run():
 
 
 # RUN button
-button1 = Button(window, text="**RUN**", bg="red", font=("Times", 12), command=run)
+button1 = Button(window, text="**RUN**", bg="red", font=("Times", 15), command=run)
 button1.grid(row=1, column=4, padx=30, pady=15)
 
 window.mainloop()
