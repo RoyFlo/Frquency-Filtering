@@ -42,12 +42,12 @@ def run():
     cutoff = setCutoff.get()
     order = setOrder.get()
 
+    print("Uploading " + img)
     image = imread(img, as_gray=True)
     msg = "**SOMETHING GOES HERE**"
 
     obj = Filters(image, filter, cutoff, order)
     out = obj.DFT()
-    print("OUT: ", out)
 
     a1 = fig.add_subplot(221)
     a1.imshow(image, cmap=plt.cm.Greys_r)
@@ -83,19 +83,19 @@ var4.set(2)
 
 # Image menu
 setImg = OptionMenu(window, var1, *iList, command=iValue)
-setImg.configure(font=("Times"))
+setImg.configure(font="Times")
 setImg.grid(row=1, column=0)
 # Filter menu
 setFilter = OptionMenu(window, var2, *filterList, command=fValue)
-setFilter.configure(font=("Times"))
+setFilter.configure(font="Times")
 setFilter.grid(row=1, column=1)
 # Cutoff Entry
 setCutoff = Entry(window, textvariable=var3)
-setCutoff.configure(font=("Times"))
+setCutoff.configure(font="Times")
 setCutoff.grid(row=1, column=2)
 # Order Entry
 setOrder = Entry(window, textvariable=var4)
-setOrder.configure(font=("Times"))
+setOrder.configure(font="Times")
 setOrder.grid(row=1, column=3)
 
 
