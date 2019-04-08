@@ -6,6 +6,8 @@ from matplotlib.figure import Figure
 from skimage.io import imread
 import skimage.transform as skt
 
+from Filters import Filters
+
 #Creates and sets the size of the GUI window
 window = Tk()
 window.geometry("820x820")
@@ -39,10 +41,9 @@ def run():
     print("***RUNNING***")
     cutoff = setCutoff.get()
     order = setOrder.get()
-    print("Image = ", img)
-    print("Filter = ", filter)
-    print("Cutoff = ", cutoff)
-    print("Order = ", order)
+
+    obj = Filters(img, filter, cutoff, order)
+
 
     image = imread(img, as_gray=True)
     msg = "**SOMETHING GOES HERE**"
