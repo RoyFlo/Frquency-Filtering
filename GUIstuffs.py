@@ -37,6 +37,15 @@ def fValue(value):
     filter = value
     print(filter)
 
+def run():
+
+    cutoff = setCutoff.get()
+    order = setOrder.get()
+    print("Image = ", img)
+    print("Filter = ", filter)
+    print("Cutoff = ", cutoff)
+    print("Order = ", order)
+
 
 iList = ["Image1", "Image2", "Image3", "Image4", "Image5", "Image6"]
 sList = [1,2,3,4,5,6,7,8,9,10]
@@ -68,18 +77,16 @@ set2.grid(row=1, column=1)
 
 setCutoff = Entry(window, textvariable=var3)
 setCutoff.grid(row=1, column=2)
-cutoff = var3.get()
 
 setOrder = Entry(window, textvariable=var4)
 setOrder.grid(row=1, column=3)
-order = var4.get()
 
 
-print(img, filter, order, cutoff)
+#print(img, filter, order, cutoff)
 
 fig = Figure(figsize=(7, 7))
 
-button1 = Button(window, text="**RUN**", bg="red")
+button1 = Button(window, text="**RUN**", bg="red", command=run)
 button1.grid(row=1, column=5)
 
 window.mainloop()
