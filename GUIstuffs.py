@@ -90,7 +90,7 @@ def run():
     msg = "**SOMETHING GOES HERE**"
 
     obj = Filters(image, filter, cutoff, order)
-    out = obj.DFT()
+    out = obj.FFT()
 
     # Image display
     a1 = fig.add_subplot(221)
@@ -99,11 +99,12 @@ def run():
 
     # DFT graph
     a2 = fig.add_subplot(222)
-    a2.imshow(out, cmap=plt.cm.Greys_r)
+    a2.imshow(out[0], cmap=plt.cm.Greys_r)
     a2.set_title("Magnitude DFT")
 
     # Mask graph
     a3 = fig.add_subplot(223)
+    a3.imshow(out[1], cmap=plt.cm.Greys_r)
     a3.set_title("Mask")
 
     # Resulting Image display
