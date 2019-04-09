@@ -105,22 +105,22 @@ def run():
 
     # Image display
     a1 = fig.add_subplot(221)
-    a1.imshow(image, cmap=plt.cm.Greys_r)
+    a1.imshow(image, cmap='binary_r')
     a1.set_title("Original Image")
 
     # DFT graph
     a2 = fig.add_subplot(222)
-    a2.imshow(out[0], cmap=plt.cm.Greys_r)
+    a2.imshow(out[0], cmap='binary_r')
     a2.set_title("Magnitude DFT")
 
     # Mask graph
     a3 = fig.add_subplot(223)
-    a3.imshow(out[1], cmap=plt.cm.Greys_r)
+    a3.imshow(out[1], cmap='binary_r')
     a3.set_title("Mask")
 
     # Resulting Image display
     a4 = fig.add_subplot(224)
-    a4.imshow(out[2], cmap=plt.cm.Greys_r)
+    a4.imshow(out[2], cmap='binary_r')
     a4.set_title("Filtered Image")
 
     fig.tight_layout()
