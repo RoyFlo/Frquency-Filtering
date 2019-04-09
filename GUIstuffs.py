@@ -5,6 +5,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from skimage.io import imread
 import skimage.transform as skt
+import time
 
 from Filters import Filters
 
@@ -45,7 +46,6 @@ def fValue(value):
 iList = ["Image1", "Image2", "Image3", "Image4", "Image5", "Image6"]
 filterList = ["Ideal High Pass", "Ideal Low Pass", "Gaussian High Pass", "Gaussian Low Pass", "Butterworth High Pass",
               "Butterworth Low Pass"]
-
 # Image Var
 var1 = StringVar()
 var1.set("Image1")
@@ -85,12 +85,23 @@ def run():
     cutoff = setCutoff.get()
     order = setOrder.get()
 
+    # Load image
     print("Uploading " + img)
     image = imread(img, as_gray=True)
-    msg = "**SOMETHING GOES HERE**"
 
+    # Timer Start
+    start = time.time()
+    print("Starting Timer")
+
+    # Filter Image
     obj = Filters(image, filter, cutoff, order)
     out = obj.FFT()
+
+    # Timer End
+    end = time.time()
+    print("Timer Stopped")
+    t = float("{0:.3f}".format(end-start))
+    print("Total Time = ", t)
 
     # Image display
     a1 = fig.add_subplot(221)
@@ -114,6 +125,8 @@ def run():
     fig.tight_layout()
     canvas = FigureCanvasTkAgg(fig, master=window)
     canvas.get_tk_widget().grid(row=2, columnspan=5)
+    t1 = str(t)
+    msg = "Time Elapsed: " + t1
     Label(window, text=msg, font=("Times", 10), fg="red").grid(row=3, sticky=NE)
     canvas.draw()
 
