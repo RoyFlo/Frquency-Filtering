@@ -70,6 +70,34 @@ class Filters:
         print("Ideal Low Pass")
         return mask
 
+    def process(self, image):
+        img = image.copy()
+
+        ## Find the min and max
+        min = 256
+        max = 0
+        for row in range(image.shape[0]):
+            for col in range(image.shape[1]):
+                if image[row, col] > max:
+                    max = image[row, col]
+                if image[row, col] < min:
+                    min = image[row, col]
+
+        ## Full Contrast Stretch
+        for row in range(image.shape[0]):
+            for col in range(image.shape[1]):
+                img[row, col] = ((image[row, col] - min)/(max-min)) * 255
+        print("Full Contrast Stretch Complete")
+
+        ## Take Negative if High Pass Filter
+        if self.filter in [self.ideal_high_pass]:
+            print("Taking negative of image.")
+            for row in range(image.shape[0]):
+                for col in range(image.shape[1]):
+                    img[row, col] = 255 - img[row, col]
+
+        return img
+
     def FFT(self):
         print("**FFT**")
 
@@ -85,8 +113,17 @@ class Filters:
 
         # Apply mask to shifted DFT
         filtered = fshift * mask
-
         # Magnitude of filtered DFT
         filtered_dft = 20 * np.log(np.abs(filtered))
+        # 5. compute the inverse shift1
+        f_ishift = np.fft.ifftshift(filtered)
+        # 6. compute the inverse fourier transform
+        img_back = np.fft.ifft2(f_ishift)
+        img_back = np.abs(img_back)
 
-        return [magnitude_dft, filtered_dft]
+        # Full contrast stretch or take negative if needed
+        post_img = self.process(img_back)
+
+        print("**COMPLETE**")
+
+        return [magnitude_dft, filtered_dft, post_img]

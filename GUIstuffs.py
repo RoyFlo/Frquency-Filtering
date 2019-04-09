@@ -120,6 +120,7 @@ def run():
 
     # Resulting Image display
     a4 = fig.add_subplot(224)
+    a4.imshow(out[2], cmap=plt.cm.Greys_r)
     a4.set_title("Filtered Image")
 
     fig.tight_layout()
