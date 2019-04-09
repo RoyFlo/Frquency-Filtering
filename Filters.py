@@ -52,7 +52,6 @@ class Filters:
         N, M = shape
         P = N/2
         Q = M/2
-        print("N = ", N, "M = ", M)
 
         D = np.empty(shape)
         mask = np.empty(shape)
@@ -91,7 +90,3 @@ class Filters:
         filtered_dft = 20 * np.log(np.abs(filtered))
 
         return [magnitude_dft, filtered_dft]
-
-
-
-
