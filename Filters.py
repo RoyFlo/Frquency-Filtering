@@ -12,7 +12,6 @@ class Filters:
     def __init__(self, image, filter, cutoff, order=0):
 
         self.image = image
-        self.filter = filter
         self.cutoff = cutoff
         self.order = order
 
@@ -25,9 +24,17 @@ class Filters:
             self.filter = self.ideal_high_pass
         elif filter == 'Ideal Low Pass':
             self.filter = self.ideal_low_pass
+        elif filter == 'Gaussian High Pass':
+            self.filter = self.gaussian_high_pass
+        elif filter == 'Gaussian Low Pass':
+            self.filter = self.gaussian_low_pass
+        elif filter == 'Butterworth High Pass':
+            self.filter = self.butterworth_high_pass
+        elif filter == 'Butterworth Low Pass':
+            self.filter = self.butterworth_low_pass
+
 
     def ideal_high_pass(self, shape, cutoff):
-        print("Shape: ", shape)
         N, M = shape
         P = N / 2
         Q = M / 2
@@ -51,7 +58,6 @@ class Filters:
 
     def ideal_low_pass(self, shape, cutoff):
         N, M = shape
-        print("Shape: ", shape)
         P = N/2
         Q = M/2
 
@@ -70,6 +76,90 @@ class Filters:
                     mask[row, col] = 0
 
         print("Ideal Low Pass")
+        return mask
+
+    def gaussian_high_pass(self, shape, cutoff):
+        N, M = shape
+        P = N / 2
+        Q = M / 2
+
+        D = np.empty(shape)
+        mask = np.empty(shape)
+
+        for row in range(D.shape[0]):
+            for col in range(D.shape[1]):
+                D[row, col] = np.sqrt(((row - P) * (row - P)) + ((col - Q) * (col - Q)))
+
+        sig = 2 * (cutoff ** 2)
+
+        for row in range(D.shape[0]):
+            for col in range(D.shape[1]):
+                mask[row, col] = 1 - math.exp(-(D[row, col] ** 2) / sig)
+
+        print("Gaussian High Pass")
+        return mask
+
+    def gaussian_low_pass(self, shape, cutoff):
+        N, M = shape
+        P = N / 2
+        Q = M / 2
+
+        D = np.empty(shape)
+        mask = np.empty(shape)
+
+        for row in range(D.shape[0]):
+            for col in range(D.shape[1]):
+                D[row, col] = np.sqrt(((row - P) * (row - P)) + ((col - Q) * (col - Q)))
+
+        sig = 2 * (cutoff ** 2)
+
+        for row in range(D.shape[0]):
+            for col in range(D.shape[1]):
+                mask[row, col] = math.exp(-(D[row, col]**2) / sig)
+
+        print("Gaussian Low Pass")
+        return mask
+
+    def butterworth_high_pass(self, shape, cutoff, order):
+        N, M = shape
+        P = N / 2
+        Q = M / 2
+
+        D = np.empty(shape)
+        mask = np.empty(shape)
+
+        for row in range(D.shape[0]):
+            for col in range(D.shape[1]):
+                D[row, col] = np.sqrt(((row - P) * (row - P)) + ((col - Q) * (col - Q)))
+
+        newOrder = 2 * order
+
+        for row in range(D.shape[0]):
+            for col in range(D.shape[1]):
+                mask[row, col] = 1 / (1 + (cutoff / D[row, col]) ** newOrder)
+
+        print("Butterworth High Pass")
+        return mask
+
+    def butterworth_low_pass(self, shape, cutoff, order):
+        N, M = shape
+        P = N / 2
+        Q = M / 2
+
+        D = np.empty(shape)
+        mask = np.empty(shape)
+
+        for row in range(D.shape[0]):
+            for col in range(D.shape[1]):
+                D[row, col] = np.sqrt(((row - P) * (row - P)) + ((col - Q) * (col - Q)))
+
+        newOrder = 2 * order
+
+        for row in range(D.shape[0]):
+            for col in range(D.shape[1]):
+                mask[row, col] = 1 / (1 + (D[row, col] / cutoff) ** newOrder)
+
+        print("Butterworth Low Pass")
         return mask
 
     def process(self, image):
@@ -92,10 +182,10 @@ class Filters:
         print("Full Contrast Stretch Complete")
 
         ## Take Negative if High Pass Filter
-        if self.filter in [self.ideal_high_pass]:
+        if self.filter in [self.ideal_high_pass, self.gaussian_high_pass, self.butterworth_high_pass]:
             print("Taking negative of image.")
             for row in range(image.shape[0]):
-                for col in range(image.shape[1]):
+                 for col in range(image.shape[1]):
                     img[row, col] = 255 - img[row, col]
 
         return img
@@ -111,7 +201,10 @@ class Filters:
         # Magnitude of DFT
         magnitude_dft = 20 * np.log(np.abs(fshift))
 
-        mask = self.filter(fshift.shape, int(self.cutoff))
+        if self.filter in [self.butterworth_high_pass, self.butterworth_low_pass]:
+            mask = self.filter(fshift.shape, int(self.cutoff), int(self.order))
+        else:
+            mask = self.filter(fshift.shape, int(self.cutoff))
 
         # Apply mask to shifted DFT
         filtered = fshift * mask
