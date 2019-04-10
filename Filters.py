@@ -27,6 +27,7 @@ class Filters:
             self.filter = self.ideal_low_pass
 
     def ideal_high_pass(self, shape, cutoff):
+        print("Shape: ", shape)
         N, M = shape
         P = N / 2
         Q = M / 2
@@ -50,6 +51,7 @@ class Filters:
 
     def ideal_low_pass(self, shape, cutoff):
         N, M = shape
+        print("Shape: ", shape)
         P = N/2
         Q = M/2
 

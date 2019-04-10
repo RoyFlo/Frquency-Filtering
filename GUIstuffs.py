@@ -5,6 +5,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from skimage.io import imread
 import skimage.transform as skt
+import cv2
 import time
 
 from Filters import Filters
@@ -77,17 +78,18 @@ setOrder.configure(font="Times")
 setOrder.grid(row=1, column=3)
 
 # Figure for the graphs
-fig = Figure(figsize=(6.5, 6.5))
+fig = plt.figure(figsize=(6.5, 6.5))
 canvas = FigureCanvasTkAgg(fig, master=window)
 
 def run():
     print("***RUNNING***")
+
     cutoff = setCutoff.get()
     order = setOrder.get()
 
     # Load image
     print("Uploading " + img)
-    image = imread(img, as_gray=True)
+    image = cv2.imread(img, 0)
 
     # Timer Start
     start = time.time()
@@ -102,6 +104,9 @@ def run():
     print("Timer Stopped")
     t = float("{0:.3f}".format(end-start))
     print("Total Time = ", t)
+
+    # clear old plots
+    plt.clf()
 
     # Image display
     a1 = fig.add_subplot(221)
@@ -126,6 +131,8 @@ def run():
     fig.tight_layout()
     canvas = FigureCanvasTkAgg(fig, master=window)
     canvas.get_tk_widget().grid(row=2, columnspan=5)
+
+    # print time
     t1 = str(t)
     msg = "Time Elapsed: " + t1
     Label(window, text=msg, font=("Times", 10), fg="red").grid(row=3, sticky=NE)
