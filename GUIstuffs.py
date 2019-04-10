@@ -80,6 +80,7 @@ setOrder.grid(row=1, column=3)
 fig = Figure(figsize=(6.5, 6.5))
 canvas = FigureCanvasTkAgg(fig, master=window)
 
+
 def run():
     print("***RUNNING***")
     cutoff = setCutoff.get()
@@ -90,7 +91,7 @@ def run():
     msg = "**SOMETHING GOES HERE**"
 
     obj = Filters(image, filter, cutoff, order)
-    out = obj.DFT()
+    out = obj.built_fft()
 
     # Image display
     a1 = fig.add_subplot(221)
