@@ -91,7 +91,7 @@ def run():
     msg = "**SOMETHING GOES HERE**"
 
     obj = Filters(image, filter, cutoff, order)
-    out = obj.built_fft()
+    out = obj.DFT()
 
     # Image display
     a1 = fig.add_subplot(221)
