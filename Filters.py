@@ -221,4 +221,10 @@ class Filters:
 
         print("**COMPLETE**")
 
+        # originalImage = np.int32(self.image)
+        # blurred = np.int32(post_img)
+        # diff = originalImage - blurred
+        # unsharp = self.image + (20*diff)
+
+
         return [magnitude_dft, filtered_dft, post_img]

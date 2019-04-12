@@ -5,10 +5,19 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from skimage.io import imread
 import skimage.transform as skt
+from decimal import Decimal
 import cv2
 import time
+from datetime import datetime
 
 from Filters import Filters
+
+def is_number(value):
+    try:
+        value = Decimal(value)
+        return True
+    except:
+        return False
 
 # Creates and sets the size of the GUI window
 window = Tk()
@@ -20,6 +29,8 @@ Label(window, text="1. Select an Image", font=("Ariel", 12), fg="blue").grid(row
 Label(window, text="2. Select Filter", font=("Ariel", 12), fg="blue").grid(row=0, column=1)
 Label(window, text="3. Enter Cutoff", font=("Ariel", 12), fg="blue").grid(row=0, column=2)
 Label(window, text="4. Enter Order", font=("Ariel", 12), fg="blue").grid(row=0, column=3)
+Label(window, text="5. Enter Weight", font=("Ariel", 12), fg="blue").grid(row=0, column=4)
+
 
 # Sets the defaults of the program
 img = "Image1.png"
@@ -59,6 +70,9 @@ var3.set(15)
 # Order Var
 var4 = StringVar()
 var4.set(2)
+# Weight Var
+var5 = StringVar()
+var5.set(None)
 
 # Image Menu
 setImg = OptionMenu(window, var1, *iList, command=iValue)
@@ -76,6 +90,10 @@ setCutoff.grid(row=1, column=2)
 setOrder = Entry(window, textvariable=var4)
 setOrder.configure(font="Times")
 setOrder.grid(row=1, column=3)
+# Weight Entry
+setWeight = Entry(window, textvariable=var5)
+setWeight.configure(font="Times")
+setWeight.grid(row=1, column=4)
 
 # Figure for the graphs
 fig = plt.figure(figsize=(6.5, 6.5))
@@ -124,9 +142,27 @@ def run():
     a3.set_title("Mask")
 
     # Resulting Image display
-    a4 = fig.add_subplot(224)
-    a4.imshow(out[2], cmap='binary_r')
-    a4.set_title("Filtered Image")
+
+    """if there is a value inside of the Weight field,
+    the program assumes to use unsharp, otherwise
+    it uses original filter"""
+    if is_number(setWeight.get()):
+        output_dir = 'output/'
+        output_image_name = output_dir + "_" + datetime.now().strftime("%m%d-%H%M%S") + ".jpg"
+        image1 = np.int32(image)
+        image2 = np.int32(out[2])
+        diff = image1 - image2
+        unsharpImage = image + (float(setWeight.get()) * diff)
+        a4 = fig.add_subplot(224)
+        a4.imshow(unsharpImage, cmap='binary_r')
+        a4.set_title("Filtered Image")
+        cv2.imwrite(output_image_name, unsharpImage)
+    else:
+        a4 = fig.add_subplot(224)
+        a4.imshow(out[2], cmap='binary_r')
+        a4.set_title("Filtered Image")
+
+
 
     fig.tight_layout()
     canvas = FigureCanvasTkAgg(fig, master=window)
@@ -141,6 +177,6 @@ def run():
 
 # RUN button
 button1 = Button(window, text="**RUN**", bg="red", font=("Times", 15), command=run)
-button1.grid(row=1, column=4, padx=30, pady=15)
+button1.grid(row=1, column=5, padx=30, pady=15)
 
 window.mainloop()
