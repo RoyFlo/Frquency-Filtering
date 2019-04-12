@@ -32,7 +32,8 @@ class Filters:
             self.filter = self.butterworth_high_pass
         elif filter == 'Butterworth Low Pass':
             self.filter = self.butterworth_low_pass
-
+        elif filter == 'Laplacian':
+            self.filter = self.laplacian
 
     def ideal_high_pass(self, shape, cutoff):
         N, M = shape
@@ -162,6 +163,25 @@ class Filters:
         print("Butterworth Low Pass")
         return mask
 
+    def laplacian(self, shape):
+        N, M = shape
+        P = N / 2
+        Q = M / 2
+
+        D = np.empty(shape)
+        mask = np.empty(shape)
+
+        for row in range(D.shape[0]):
+            for col in range(D.shape[1]):
+                D[row, col] = np.sqrt(((row - P) * (row - P)) + ((col - Q) * (col - Q)))
+
+        for row in range(D.shape[0]):
+            for col in range(D.shape[1]):
+                mask[row, col] = 1 + (4 * ((np.pi ** 2) * (D[row, col] ** 2)))
+
+        print("Laplacian")
+        return mask
+
     def process(self, image):
         img = image.copy()
 
@@ -180,7 +200,6 @@ class Filters:
             for col in range(image.shape[1]):
                 img[row, col] = ((image[row, col] - min)/(max-min)) * 255
         print("Full Contrast Stretch Complete")
-
         ## Take Negative if High Pass Filter
         if self.filter in [self.ideal_high_pass, self.gaussian_high_pass, self.butterworth_high_pass]:
             print("Taking negative of image.")
@@ -203,6 +222,10 @@ class Filters:
 
         if self.filter in [self.butterworth_high_pass, self.butterworth_low_pass]:
             mask = self.filter(fshift.shape, int(self.cutoff), int(self.order))
+
+        elif self.filter in [self.laplacian]:
+            mask = self.filter(fshift.shape)
+
         else:
             mask = self.filter(fshift.shape, int(self.cutoff))
 

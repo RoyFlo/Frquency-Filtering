@@ -46,7 +46,7 @@ def fValue(value):
 
 iList = ["Image1", "Image2", "Image3", "Image4", "Image5", "Image6"]
 filterList = ["Ideal High Pass", "Ideal Low Pass", "Gaussian High Pass", "Gaussian Low Pass", "Butterworth High Pass",
-              "Butterworth Low Pass"]
+              "Butterworth Low Pass", "Laplacian"]
 # Image Var
 var1 = StringVar()
 var1.set("Image1")
