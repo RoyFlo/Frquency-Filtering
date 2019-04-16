@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import array
 import cv2
 import math
 
@@ -224,36 +223,18 @@ class Filters:
 
         return [magnitude_dft, filtered_dft, post_img]
 
-
     """ Computes forward Fourier transform of input image. 2d matrix image.
-        Returns dft. Test runtime speed of self built function with built-in
+        Returns dft in ndarray format. Test runtime speed of self built function with built-in
         np fft - fft2 functions. """
     def built_fft(self):
         print("**Test case (own) DFT**")
 
-        height_img = len(self.image)
-        width_img = len(self.image[0])
-        pie = math.pi * 2.0
+        img = self.image
 
-        forward_trans = np.zeros((height_img, width_img), self.image.dtype)
-        # for i in range(height_img):
-        #     for j in range(width_img):
-        #         for m in range(height_img):
-        #             for n in range(width_img):
-        #                 temp = (pie / height_img) * (i * m + j * n)
-        #                 temp_two = math.cos(temp) + math.sqrt(-1) * math.sin(temp)
-        #                 temp_two *= self.image[i][j]
-        #                 forward_trans[i][j] += temp_two
+        (h, w) = img.shape
+        fwd_trans = np.array(
+            [[sum([(img[i][j] * math.exp(-1 * math.sqrt(-1) * ((2 * math.pi) / h) * (u * i + v * j)))
+                   for i in range(h) for j in range(w)]) for v in range(w)] for u in range(h)])
 
-        return forward_trans
+        return fwd_trans
 
-    def mask(self):
-        print("**MASK**")
-
-        # Full contrast stretch or take negative if needed
-        post_img = self.process(img_back)
-
-
-        print("**COMPLETE**")
-
-        return [magnitude_dft, filtered_dft, post_img]

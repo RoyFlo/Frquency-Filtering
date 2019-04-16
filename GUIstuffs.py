@@ -81,7 +81,6 @@ setOrder.grid(row=1, column=3)
 fig = plt.figure(figsize=(6.5, 6.5))
 canvas = FigureCanvasTkAgg(fig, master=window)
 
-
 def run():
     print("***RUNNING***")
 
