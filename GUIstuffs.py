@@ -1,4 +1,6 @@
 from tkinter import *
+from tkinter.filedialog import askopenfilename
+from tkinter.messagebox import showerror
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -54,7 +56,8 @@ order = 2
 # Changes the image
 def iValue(value):
     global img
-    img = value+".png"
+    #img = value+".png"
+    img = value
     print("You have selected " + img)
 
 
@@ -89,8 +92,13 @@ var5.set(None)
 var6 = StringVar()
 var6.set(2)
 
+def selectImg():
+    imgname = askopenfilename()
+    iValue(imgname)
+
 # Image Menu
-setImg = OptionMenu(window, var1, *iList, command=iValue)
+#setImg = OptionMenu(window, var1, *iList, command=iValue)
+setImg = Button(window, text="*Img Select*", command=selectImg)
 setImg.configure(font="Times")
 setImg.grid(row=1, column=0)
 # Filter Menu
