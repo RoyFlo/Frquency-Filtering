@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import math
+import time
 
 
 class Filters:
@@ -228,6 +229,8 @@ class Filters:
         np fft - fft2 functions. """
     def built_fft(self):
         print("**Test case (own) DFT**")
+        print("Timer for own DFT started...")
+        start_time = time.time()
 
         img = self.image
 
@@ -236,5 +239,9 @@ class Filters:
             [[sum([(img[i][j] * math.exp(-1 * math.sqrt(-1) * ((2 * math.pi) / h) * (u * i + v * j)))
                    for i in range(h) for j in range(w)]) for v in range(w)] for u in range(h)])
 
-        return fwd_trans
+        end_time = time.time()
+        print("Timer for own DFT Stopped")
+        t = float("{0:.3f}".format(end_time - start_time))
+        print("Total Time for own DFT = ", t)
 
+        return fwd_trans
