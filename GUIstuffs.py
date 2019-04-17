@@ -39,6 +39,7 @@ Label(window, text="2. Select Filter", font=("Ariel", 12), fg="blue").grid(row=0
 Label(window, text="3. Enter Cutoff", font=("Ariel", 12), fg="blue").grid(row=0, column=2)
 Label(window, text="4. Enter Order", font=("Ariel", 12), fg="blue").grid(row=0, column=3)
 Label(window, text="5. Enter Weight", font=("Ariel", 12), fg="blue").grid(row=0, column=4)
+Label(window, text="6. Enter Width", font=("Ariel", 12), fg="blue").grid(row=0, column=5)
 
 
 # Sets the defaults of the program
@@ -65,8 +66,10 @@ def fValue(value):
 
 
 iList = ["Image1", "Image2", "Image3", "Image4", "Image5", "Image6"]
-filterList = ["Ideal High Pass", "Ideal Low Pass", "Gaussian High Pass", "Gaussian Low Pass", "Butterworth High Pass",
-              "Butterworth Low Pass"]
+filterList = ["Ideal High Pass", "Ideal Low Pass", "Ideal Band Reject", "Ideal Band Pass", "Gaussian High Pass",
+              "Gaussian Low Pass", "Gaussian Band Reject", "Gaussian Band Pass", "Butterworth High Pass",
+              "Butterworth Low Pass", "Butterworth Band Reject", "Butterworth Band Pass","Laplacian", ]
+
 # Image Var
 var1 = StringVar()
 var1.set("Image1")
@@ -82,6 +85,9 @@ var4.set(2)
 # Weight Var
 var5 = StringVar()
 var5.set(None)
+# Width Var
+var6 = StringVar()
+var6.set(2)
 
 # Image Menu
 setImg = OptionMenu(window, var1, *iList, command=iValue)
@@ -103,6 +109,10 @@ setOrder.grid(row=1, column=3)
 setWeight = Entry(window, textvariable=var5)
 setWeight.configure(font="Times")
 setWeight.grid(row=1, column=4)
+# Width Entry
+setWidth = Entry(window, textvariable=var6)
+setWidth.configure(font="Times")
+setWidth.grid(row=1, column=5)
 
 # Figure for the graphs
 fig = plt.figure(figsize=(6.5, 6.5))
@@ -113,6 +123,7 @@ def run():
 
     cutoff = setCutoff.get()
     order = setOrder.get()
+    width = setWidth.get()
 
     # Load image
     print("Uploading " + img)
@@ -123,7 +134,7 @@ def run():
     print("Starting Timer")
 
     # Filter Image
-    obj = Filters(image, filter, cutoff, order)
+    obj = Filters(image, filter, cutoff, order, width)
     out = obj.FFT()
 
     # Timer End
@@ -148,6 +159,7 @@ def run():
     # Mask graph
     a3 = fig.add_subplot(223)
     a3.imshow(out[1], cmap='binary_r')
+    a3.set_facecolor('k')
     a3.set_title("Mask")
 
     # Resulting Image display
@@ -189,6 +201,6 @@ def run():
 
 # RUN button
 button1 = Button(window, text="**RUN**", bg="red", font=("Times", 15), command=run)
-button1.grid(row=1, column=5, padx=30, pady=15)
+button1.grid(row=1, column=6, padx=30, pady=15)
 
 window.mainloop()

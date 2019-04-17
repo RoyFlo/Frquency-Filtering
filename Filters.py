@@ -8,43 +8,64 @@ class Filters:
     filter = None
     cutoff = None
     order = None
+    width = None
 
-    def __init__(self, image, filter, cutoff, order=0):
+    def __init__(self, image, filter, cutoff, order=0, width=0):
 
         self.image = image
         self.cutoff = cutoff
         self.order = order
+        self.width = width
 
         print("**FILTERING**")
         print("Filter = ", filter)
         print("Cutoff = ", cutoff)
         print("Order = ", order)
+        print("Width = ", width)
 
         if filter == 'Ideal High Pass':
             self.filter = self.ideal_high_pass
         elif filter == 'Ideal Low Pass':
             self.filter = self.ideal_low_pass
+        elif filter == 'Ideal Band Reject':
+            self.filter = self.ideal_BR
+        elif filter == 'Ideal Band Pass':
+            self.filter = self.ideal_BP
         elif filter == 'Gaussian High Pass':
             self.filter = self.gaussian_high_pass
         elif filter == 'Gaussian Low Pass':
             self.filter = self.gaussian_low_pass
+        elif filter == 'Gaussian Band Reject':
+            self.filter = self.gaussian_BR
+        elif filter == 'Gaussian Band Pass':
+            self.filter = self.gaussian_BP
+        elif filter == 'Butterworth Band Reject':
+            self.filter = self.btw_BR
+        elif filter == 'Butterworth Band Pass':
+            self.filter = self.btw_BP
         elif filter == 'Butterworth High Pass':
             self.filter = self.butterworth_high_pass
         elif filter == 'Butterworth Low Pass':
             self.filter = self.butterworth_low_pass
+        elif filter == 'Laplacian':
+            self.filter = self.laplacian
 
 
-    def ideal_high_pass(self, shape, cutoff):
+    def find_freq_domain(self, shape):
+
         N, M = shape
         P = N / 2
         Q = M / 2
-
         D = np.empty(shape)
-        mask = np.empty(shape)
-
         for row in range(D.shape[0]):
             for col in range(D.shape[1]):
                 D[row, col] = np.sqrt(((row - P) * (row - P)) + ((col - Q) * (col - Q)))
+
+        return D
+    def ideal_high_pass(self, shape, cutoff):
+
+        D = Filters.find_freq_domain(self, shape)
+        mask = np.empty(shape)
 
         for row in range(mask.shape[0]):
             for col in range(mask.shape[1]):
@@ -57,38 +78,33 @@ class Filters:
         return mask
 
     def ideal_low_pass(self, shape, cutoff):
-        N, M = shape
-        P = N/2
-        Q = M/2
-
-        D = np.empty(shape)
-        mask = np.empty(shape)
-
-        for row in range(D.shape[0]):
-            for col in range(D.shape[1]):
-                D[row, col] = np.sqrt(((row - P)*(row - P)) + ((col - Q)*(col - Q)))
-
-        for row in range(mask.shape[0]):
-            for col in range(mask.shape[1]):
-                if D[row, col] <= cutoff:
-                    mask[row, col] = 1
-                if D[row, col] > cutoff:
-                    mask[row, col] = 0
-
+        mask = 1 - Filters.ideal_high_pass(self, shape, cutoff)
         print("Ideal Low Pass")
         return mask
 
-    def gaussian_high_pass(self, shape, cutoff):
-        N, M = shape
-        P = N / 2
-        Q = M / 2
+    def ideal_BR(self, shape, cutoff, width):
 
-        D = np.empty(shape)
+        D = Filters.find_freq_domain(self, shape)
         mask = np.empty(shape)
 
-        for row in range(D.shape[0]):
-            for col in range(D.shape[1]):
-                D[row, col] = np.sqrt(((row - P) * (row - P)) + ((col - Q) * (col - Q)))
+        for row in range(mask.shape[0]):
+            for col in range(mask.shape[1]):
+                if (cutoff - width / 2 <= D[row, col]) and (D[row, col] <= cutoff + width / 2):
+                    mask[row, col] = 0
+                else:
+                    mask[row, col] = 1
+
+        print("Ideal Band Reject")
+        return mask
+    def ideal_BP(self, shape, cutoff, width):
+        mask = 1 - Filters.ideal_BR(self, shape, cutoff, width)
+
+        print("Ideal Band Pass")
+        return mask
+
+    def gaussian_high_pass(self, shape, cutoff):
+        D = Filters.find_freq_domain(self, shape)
+        mask = np.empty(shape)
 
         sig = 2 * (cutoff ** 2)
 
@@ -100,37 +116,36 @@ class Filters:
         return mask
 
     def gaussian_low_pass(self, shape, cutoff):
-        N, M = shape
-        P = N / 2
-        Q = M / 2
-
-        D = np.empty(shape)
-        mask = np.empty(shape)
-
-        for row in range(D.shape[0]):
-            for col in range(D.shape[1]):
-                D[row, col] = np.sqrt(((row - P) * (row - P)) + ((col - Q) * (col - Q)))
-
-        sig = 2 * (cutoff ** 2)
-
-        for row in range(D.shape[0]):
-            for col in range(D.shape[1]):
-                mask[row, col] = math.exp(-(D[row, col]**2) / sig)
+        mask = 1 - Filters.gaussian_high_pass(self, shape, cutoff)
 
         print("Gaussian Low Pass")
         return mask
 
-    def butterworth_high_pass(self, shape, cutoff, order):
-        N, M = shape
-        P = N / 2
-        Q = M / 2
+    def gaussian_BR(self, shape, cutoff, width):
 
-        D = np.empty(shape)
+        D = Filters.find_freq_domain(self, shape)
         mask = np.empty(shape)
 
-        for row in range(D.shape[0]):
-            for col in range(D.shape[1]):
-                D[row, col] = np.sqrt(((row - P) * (row - P)) + ((col - Q) * (col - Q)))
+        for row in range(mask.shape[0]):
+            for col in range(mask.shape[1]):
+                if D[row, col] != 0:
+                    mask[row, col] = 1 - np.exp(-1 * np.square((np.square(D[row, col]) - np.square(cutoff)) / (D[row, col]
+                                                * width)))
+                else:
+                    mask[row, col] = 1 - np.exp(-1 * np.square((np.square(D[row, col]) - np.square(cutoff)) / width))
+
+        print("Gaussian Band Reject")
+        return mask
+
+    def gaussian_BP(self, shape, cutoff, width):
+        mask = 1 - Filters.gaussian_BR(self, shape, cutoff, width)
+
+        print("Gaussian Band Pass")
+        return mask
+
+    def butterworth_high_pass(self, shape, cutoff, order):
+        D = Filters.find_freq_domain(self, shape)
+        mask = np.empty(shape)
 
         newOrder = 2 * order
 
@@ -142,24 +157,44 @@ class Filters:
         return mask
 
     def butterworth_low_pass(self, shape, cutoff, order):
-        N, M = shape
-        P = N / 2
-        Q = M / 2
+        mask = 1 - Filters.butterworth_high_pass(self, shape, cutoff, order)
 
-        D = np.empty(shape)
+        print("Butterworth Low Pass")
+        return mask
+
+    def btw_BR(self, shape, cutoff, order, width):
+
+        D = Filters.find_freq_domain(self, shape)
+        mask = np.empty(shape)
+
+        for row in range(mask.shape[0]):
+            for col in range(mask.shape[1]):
+                if np.square(D[row, col]) - np.square(cutoff) != 0:
+                    mask[row, col] = 1 / 1 + np.power(D[row, col] * width / (np.square(D[row, col]) - np.square(cutoff))
+                                                      , 2 * order)
+                else:
+                    mask[row, col] = 1 / 1 + np.power(D[row, col] * width, 2 * order)
+
+        print("Butterworth Band Reject")
+        return mask
+
+    def btw_BP(self, shape, cutoff, order, width):
+        mask = 1 - Filters.btw_BR(self, shape, cutoff, order,  width)
+
+        print("Butterworth Band Pass")
+        return mask
+
+    def laplacian(self, shape):
+        D = Filters.find_freq_domain(self, shape)
         mask = np.empty(shape)
 
         for row in range(D.shape[0]):
             for col in range(D.shape[1]):
-                D[row, col] = np.sqrt(((row - P) * (row - P)) + ((col - Q) * (col - Q)))
+                mask[row, col] = -1 * 4 * np.square(np.pi) * np.square(D[row, col])
 
-        newOrder = 2 * order
+        mask = 1 - mask
 
-        for row in range(D.shape[0]):
-            for col in range(D.shape[1]):
-                mask[row, col] = 1 / (1 + (D[row, col] / cutoff) ** newOrder)
-
-        print("Butterworth Low Pass")
+        print("Laplacian")
         return mask
 
     def process(self, image):
@@ -203,6 +238,12 @@ class Filters:
 
         if self.filter in [self.butterworth_high_pass, self.butterworth_low_pass]:
             mask = self.filter(fshift.shape, int(self.cutoff), int(self.order))
+        elif self.filter in [self.btw_BP, self.btw_BR]:
+            mask = self.filter(fshift.shape, int(self.cutoff), int(self.order), int(self.width))
+        elif self.filter in [self.ideal_BR, self.ideal_BP, self.gaussian_BR, self.gaussian_BP]:
+            mask = self.filter(fshift.shape, int(self.cutoff), int(self.width))
+        elif self.filter in [self.laplacian]:
+            mask = self.filter(fshift.shape)
         else:
             mask = self.filter(fshift.shape, int(self.cutoff))
 
@@ -220,11 +261,5 @@ class Filters:
         post_img = self.process(img_back)
 
         print("**COMPLETE**")
-
-        # originalImage = np.int32(self.image)
-        # blurred = np.int32(post_img)
-        # diff = originalImage - blurred
-        # unsharp = self.image + (20*diff)
-
 
         return [magnitude_dft, filtered_dft, post_img]
