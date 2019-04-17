@@ -23,14 +23,14 @@ def is_number(value):
 def showimg(img):
     cv2.namedWindow("test", cv2.WINDOW_NORMAL)
     img = np.array(img,dtype=float)/float(255)
-    cv2.imshow('test',img)
-    cv2.resizeWindow('test',600,600)
+    cv2.imshow('test', img)
+    cv2.resizeWindow('test', 600, 600)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
 # Creates and sets the size of the GUI window
 window = Tk()
-window.geometry("820x820")
+window.geometry("1200x900")
 window.title("Filtering in Frequency Domain")
 
 # Creates the text for the buttons/entries
@@ -78,7 +78,7 @@ var2 = StringVar()
 var2.set("Ideal High Pass")
 # Cutoff Var
 var3 = StringVar()
-var3.set(15)
+var3.set(75)
 # Order Var
 var4 = StringVar()
 var4.set(2)
@@ -98,13 +98,13 @@ setFilter = OptionMenu(window, var2, *filterList, command=fValue)
 setFilter.configure(font="Times")
 setFilter.grid(row=1, column=1)
 # Cutoff Entry
-setCutoff = Entry(window, textvariable=var3)
+setCutoff = Scale(window, from_=15, to=200, orient=HORIZONTAL, cursor='hand2')
 setCutoff.configure(font="Times")
-setCutoff.grid(row=1, column=2)
+setCutoff.grid(row=1, column=2, padx=10)
 # Order Entry
-setOrder = Entry(window, textvariable=var4)
+setOrder = Scale(window, from_=1, to=20, orient=HORIZONTAL, cursor='hand2')
 setOrder.configure(font="Times")
-setOrder.grid(row=1, column=3)
+setOrder.grid(row=1, column=3, padx=10)
 # Weight Entry
 setWeight = Entry(window, textvariable=var5)
 setWeight.configure(font="Times")
@@ -115,7 +115,7 @@ setWidth.configure(font="Times")
 setWidth.grid(row=1, column=5)
 
 # Figure for the graphs
-fig = plt.figure(figsize=(6.5, 6.5))
+fig = plt.figure(figsize=(7, 7))
 canvas = FigureCanvasTkAgg(fig, master=window)
 
 def run():
@@ -190,7 +190,7 @@ def run():
 
     fig.tight_layout()
     canvas = FigureCanvasTkAgg(fig, master=window)
-    canvas.get_tk_widget().grid(row=2, columnspan=5)
+    canvas.get_tk_widget().grid(row=2, columnspan=6)
 
     # print time
     t1 = str(t)

@@ -170,10 +170,10 @@ class Filters:
         for row in range(mask.shape[0]):
             for col in range(mask.shape[1]):
                 if np.square(D[row, col]) - np.square(cutoff) != 0:
-                    mask[row, col] = 1 / 1 + np.power(D[row, col] * width / (np.square(D[row, col]) - np.square(cutoff))
-                                                      , 2 * order)
+                    mask[row, col] = 1 / (1 + np.power(D[row, col] * width / (np.square(D[row, col]) - np.square(cutoff))
+                                                      , 2 * order))
                 else:
-                    mask[row, col] = 1 / 1 + np.power(D[row, col] * width, 2 * order)
+                    mask[row, col] = 1 / (1 + np.power(D[row, col] * width, 2 * order))
 
         print("Butterworth Band Reject")
         return mask
