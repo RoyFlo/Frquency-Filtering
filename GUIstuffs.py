@@ -96,9 +96,10 @@ def selectImg():
     imgname = askopenfilename()
     iValue(imgname)
 
+
 # Image Menu
-#setImg = OptionMenu(window, var1, *iList, command=iValue)
-setImg = Button(window, text="*Img Select*", command=selectImg)
+# setImg = OptionMenu(window, var1, *iList, command=iValue)
+setImg = Button(window, text="*Img Select*", command=selectImg, cursor='hand2')
 setImg.configure(font="Times")
 setImg.grid(row=1, column=0)
 # Filter Menu
@@ -108,19 +109,19 @@ setFilter.grid(row=1, column=1)
 # Cutoff Entry
 setCutoff = Scale(window, from_=15, to=200, orient=HORIZONTAL, cursor='hand2')
 setCutoff.configure(font="Times")
-setCutoff.grid(row=1, column=2, padx=10)
+setCutoff.grid(row=1, column=2, padx=5)
 # Order Entry
 setOrder = Scale(window, from_=1, to=20, orient=HORIZONTAL, cursor='hand2')
 setOrder.configure(font="Times")
-setOrder.grid(row=1, column=3, padx=10)
+setOrder.grid(row=1, column=3, padx=5)
 # Weight Entry
-setWeight = Entry(window, textvariable=var5)
+setWeight = Entry(window, textvariable=var5, width=10)
 setWeight.configure(font="Times")
-setWeight.grid(row=1, column=4)
+setWeight.grid(row=1, column=4, padx=5)
 # Width Entry
-setWidth = Entry(window, textvariable=var6)
+setWidth = Entry(window, textvariable=var6, width=10)
 setWidth.configure(font="Times")
-setWidth.grid(row=1, column=5)
+setWidth.grid(row=1, column=5, padx=5)
 
 # Figure for the graphs
 fig = plt.figure(figsize=(7, 7))
@@ -207,12 +208,12 @@ def run():
     # print time
     t1 = str(t)
     msg = "Time Elapsed: " + t1
-    Label(window, text=msg, font=("Times", 10), fg="red").grid(row=3, sticky=NE)
+    Label(window, text=msg, font=("Times", 15), fg="red").grid(row=3, sticky=NE)
     canvas.draw()
 
 
 # RUN button
-button1 = Button(window, text="**RUN**", bg="red", font=("Times", 15), command=run)
+button1 = Button(window, text="**RUN**", bg="red", font=("Times", 15), command=run, cursor='spraycan')
 button1.grid(row=1, column=6, padx=30, pady=15)
 
 window.mainloop()
