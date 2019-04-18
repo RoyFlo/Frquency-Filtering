@@ -164,14 +164,16 @@ def run():
     # DFT graph
     a2 = fig.add_subplot(222)
     a2.imshow(out[0], cmap='binary_r')
-    a2.axis('off')
+    a2.xaxis.set_visible(False)
+    a2.yaxis.set_visible(False)
     a2.set_title("Magnitude DFT")
 
     # Mask graph
     a3 = fig.add_subplot(223)
     a3.imshow(out[1], cmap='binary_r')
     a3.set_facecolor('k')
-    a3.axis('off')
+    a3.xaxis.set_visible(False)
+    a3.yaxis.set_visible(False)
     a3.set_title("Mask")
 
     # Resulting Image display
