@@ -1,16 +1,13 @@
 from tkinter import *
 from tkinter.filedialog import askopenfilename
-from tkinter.messagebox import showerror
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from skimage.io import imread
-import skimage.transform as skt
 from decimal import Decimal
 import cv2
 import time
-from datetime import datetime
 
 from Filters import Filters
 
@@ -45,7 +42,7 @@ Label(window, text="6. Enter Width", font=("Ariel", 12), fg="blue").grid(row=0, 
 
 
 # Sets the defaults of the program
-img = "Image1.png"
+img = "Image2.png"
 filter = "Ideal High Pass"
 print("Default image is: " + img)
 print("Default filter is: " + filter)
@@ -201,7 +198,6 @@ def run():
         a4.imshow(out[2], cmap='binary_r')
         a4.axis('off')
         a4.set_title("Filtered Image")
-
 
     fig.tight_layout()
     canvas = FigureCanvasTkAgg(fig, master=window)
