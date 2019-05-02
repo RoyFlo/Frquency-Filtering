@@ -9,19 +9,24 @@ class Filters:
     cutoff = None
     order = None
     width = None
+    x_val = None
+    y_val = None
 
-    def __init__(self, image, filter, cutoff, order=0, width=0):
+    def __init__(self, image, filter, cutoff, order=0, width=0, x_val=0, y_val=0):
 
         self.image = image
         self.cutoff = cutoff
         self.order = order
         self.width = width
+        self.x_val = x_val
+        self.y_val = y_val
 
         print("**FILTERING**")
         print("Filter = ", filter)
         print("Cutoff = ", cutoff)
         print("Order = ", order)
         print("Width = ", width)
+        print("Center = (", x_val, ", ", y_val, ")")
 
         if filter == 'Ideal High Pass':
             self.filter = self.ideal_high_pass
@@ -31,6 +36,10 @@ class Filters:
             self.filter = self.ideal_BR
         elif filter == 'Ideal Band Pass':
             self.filter = self.ideal_BP
+        elif filter == 'Ideal Notch Reject':
+            self.filter = self.ideal_NR
+        elif filter == 'Ideal Notch Pass':
+            self.filter = self.ideal_NP
         elif filter == 'Gaussian High Pass':
             self.filter = self.gaussian_high_pass
         elif filter == 'Gaussian Low Pass':
@@ -39,6 +48,10 @@ class Filters:
             self.filter = self.gaussian_BR
         elif filter == 'Gaussian Band Pass':
             self.filter = self.gaussian_BP
+        elif filter == 'Gaussian Notch Reject':
+            self.filter = self.gaussian_NR
+        elif filter == 'Gaussian Notch Pass':
+            self.filter = self. gaussian_NP
         elif filter == 'Butterworth Band Reject':
             self.filter = self.btw_BR
         elif filter == 'Butterworth Band Pass':
@@ -47,8 +60,17 @@ class Filters:
             self.filter = self.butterworth_high_pass
         elif filter == 'Butterworth Low Pass':
             self.filter = self.butterworth_low_pass
+        elif filter == 'Butterworth Notch Reject':
+            self.filter = self.btw_NR
+        elif filter == 'Butterworth Notch Pass':
+            self.filter = self.btw_NP
         elif filter == 'Laplacian':
             self.filter = self.laplacian
+
+
+
+
+
 
 
     def find_freq_domain(self, shape):
@@ -62,6 +84,20 @@ class Filters:
                 D[row, col] = np.sqrt(((row - P) * (row - P)) + ((col - Q) * (col - Q)))
 
         return D
+
+    def notch_freq_domain(self, shape, x_val, y_val):
+
+        N, M = shape
+        P = N / 2
+        Q = M / 2
+        D = np.empty(shape)
+        for row in range(D.shape[0]):
+            for col in range(D.shape[1]):
+                D[row, col] = np.sqrt(np.square(row - P - x_val) + np.square(col - Q - y_val))
+
+        return D
+
+
     def ideal_high_pass(self, shape, cutoff):
 
         D = Filters.find_freq_domain(self, shape)
@@ -96,10 +132,33 @@ class Filters:
 
         print("Ideal Band Reject")
         return mask
+
     def ideal_BP(self, shape, cutoff, width):
         mask = 1 - Filters.ideal_BR(self, shape, cutoff, width)
 
         print("Ideal Band Pass")
+        return mask
+
+    def ideal_NR(self, shape, cutoff, x_val, y_val):
+        D1 = Filters.notch_freq_domain(self, shape, x_val, y_val)
+        D2 = Filters.notch_freq_domain(self, shape, -x_val, -y_val)
+        mask = np.empty(shape)
+        for row in range(mask.shape[0]):
+            for col in range(mask.shape[1]):
+                if (D1[row, col] <= cutoff) or (D2[row, col] <= cutoff):
+                    mask[row, col] = 0
+                else:
+                    mask[row, col] = 1
+
+        print("Ideal Notch Reject")
+
+        return mask
+
+    def ideal_NP(self, shape, cutoff, x_val, y_val):
+        mask = 1 - Filters.ideal_NR(self, shape, cutoff, x_val, y_val)
+
+        print("Ideal Notch Pass")
+
         return mask
 
     def gaussian_high_pass(self, shape, cutoff):
@@ -143,6 +202,25 @@ class Filters:
         print("Gaussian Band Pass")
         return mask
 
+    def gaussian_NR(self, shape, cutoff, x_val, y_val):
+        D1 = Filters.notch_freq_domain(self, shape, x_val, y_val)
+        D2 = Filters.notch_freq_domain(self, shape, -x_val, -y_val)
+        mask = np.empty(shape)
+
+        for row in range(mask.shape[0]):
+            for col in range(mask.shape[1]):
+                mask[row, col] = 1 - math.exp(-.5 * ((D1[row, col] * D2[row, col])/np.square(cutoff)))
+
+        print("Gaussian Notch Reject")
+
+        return mask
+
+    def gaussian_NP(self, shape, cutoff, x_val, y_val):
+        mask = 1 - Filters.gaussian_NR(self, shape, cutoff, x_val, y_val)
+
+        print("Gaussian Notch Pass")
+        return mask
+
     def butterworth_high_pass(self, shape, cutoff, order):
         D = Filters.find_freq_domain(self, shape)
         mask = np.empty(shape)
@@ -170,11 +248,10 @@ class Filters:
         for row in range(mask.shape[0]):
             for col in range(mask.shape[1]):
                 if np.square(D[row, col]) - np.square(cutoff) != 0:
-                    mask[row, col] = 1 / 1 + np.power(D[row, col] * width / (np.square(D[row, col]) - np.square(cutoff))
-                                                      , 2 * order)
+                    mask[row, col] = 1 / (1 + np.power(D[row, col] * width / (np.square(D[row, col]) - np.square(cutoff))
+                                                      , 2 * order))
                 else:
-                    mask[row, col] = 1 / 1 + np.power(D[row, col] * width, 2 * order)
-
+                    mask[row, col] = 1 / (1 + np.power(D[row, col] * width, 2 * order))
         print("Butterworth Band Reject")
         return mask
 
@@ -182,6 +259,27 @@ class Filters:
         mask = 1 - Filters.btw_BR(self, shape, cutoff, order,  width)
 
         print("Butterworth Band Pass")
+        return mask
+
+    def btw_NR(self, shape, cutoff, order, x_val, y_val):
+        D1 = Filters.notch_freq_domain(self, shape, x_val, y_val)
+        D2 = Filters.notch_freq_domain(self, shape, -x_val, -y_val)
+        mask = np.empty(shape)
+
+        for row in range(mask.shape[0]):
+            for col in range(mask.shape[1]):
+                if D1[row, col] * D2[row, col] != 0:
+                    mask[row, col] = 1 / (1 + np.power(np.square(cutoff)/(D1[row, col] * D2[row, col]), order))
+                else:
+                    mask[row, col] = 1 / (1 + np.power(np.square(cutoff), order))
+
+        print("Butterworth Notch Reject")
+        return mask
+
+    def btw_NP(self, shape, cutoff, order, x_val, y_val):
+        mask = 1 - Filters.btw_NR(self, shape, cutoff, order, x_val, y_val)
+
+        print("Butterworth Notch Pass")
         return mask
 
     def laplacian(self, shape):
@@ -240,8 +338,12 @@ class Filters:
             mask = self.filter(fshift.shape, int(self.cutoff), int(self.order))
         elif self.filter in [self.btw_BP, self.btw_BR]:
             mask = self.filter(fshift.shape, int(self.cutoff), int(self.order), int(self.width))
+        elif self. filter in [self.btw_NR, self.btw_NP]:
+            mask = self.filter(fshift.shape, int(self.cutoff), int(self.order), int(self.x_val), int(self.y_val))
         elif self.filter in [self.ideal_BR, self.ideal_BP, self.gaussian_BR, self.gaussian_BP]:
             mask = self.filter(fshift.shape, int(self.cutoff), int(self.width))
+        elif self.filter in [self.ideal_NR, self.ideal_NP, self.gaussian_NR, self.gaussian_NP]:
+            mask = self.filter(fshift.shape, int(self.cutoff), int(self.x_val), int(self.y_val))
         elif self.filter in [self.laplacian]:
             mask = self.filter(fshift.shape)
         else:
