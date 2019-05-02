@@ -9,6 +9,9 @@ from decimal import Decimal
 import cv2
 import time
 
+from datetime import datetime
+import sys
+
 from Filters import Filters
 
 def is_number(value):
@@ -84,7 +87,7 @@ var4 = StringVar()
 var4.set(2)
 # Weight Var
 var5 = StringVar()
-var5.set(None)
+var5.set(0)
 # Width Var
 var6 = StringVar()
 var6.set(2)
@@ -130,6 +133,7 @@ def run():
     cutoff = setCutoff.get()
     order = setOrder.get()
     width = setWidth.get()
+    weight = setWeight.get()
 
     # Load image
     print("Uploading " + img)
@@ -140,7 +144,7 @@ def run():
     print("Starting Timer")
 
     # Filter Image
-    obj = Filters(image, filter, cutoff, order, width)
+    obj = Filters(image, filter, cutoff, order, width, weight)
     out = obj.FFT()
 
     # Timer End
@@ -174,34 +178,18 @@ def run():
     a3.set_title("Mask")
 
     # Resulting Image display
-
-    """if there is a value inside of the Weight field,
-    the program assumes to use unsharp, otherwise
-    it uses original filter"""
-    if is_number(setWeight.get()):
-        # output_dir = 'output/'
-        # output_image_name = output_dir + "_" + datetime.now().strftime("%m%d-%H%M%S") + ".jpg"
-        outName = "output/result.png"
-        image1 = np.int32(image)
-        image2 = np.int32(out[2])
-        diff = image1 - image2
-        unsharpImage = (image + (float(setWeight.get()) * diff))
-        cv2.imwrite(outName, unsharpImage)
-        # writes the image first, then displays the result. Doing this the other way around causes imshow to display a different image
-        resultImage = cv2.imread('output/result.png', 0)
-        a4 = fig.add_subplot(224)
-        a4.imshow(resultImage, cmap='binary_r')
-        a4.set_title("Filtered Image")
-
-    else:
-        a4 = fig.add_subplot(224)
-        a4.imshow(out[2], cmap='binary_r')
-        a4.axis('off')
-        a4.set_title("Filtered Image")
+    a4 = fig.add_subplot(224)
+    a4.imshow(out[2], cmap='binary_r')
+    a4.axis('off')
+    a4.set_title("Filtered Image")
 
     fig.tight_layout()
     canvas = FigureCanvasTkAgg(fig, master=window)
     canvas.get_tk_widget().grid(row=2, columnspan=6)
+
+    output_dir = 'output/'
+    output_image_name = output_dir + "_dft_filter_" + datetime.now().strftime("%m%d-%H%M%S") + ".jpg"
+    cv2.imwrite(output_image_name, out[2])
 
     # print time
     t1 = str(t)

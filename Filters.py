@@ -3,25 +3,29 @@ import cv2
 import math
 
 
+
 class Filters:
     image = None
     filter = None
     cutoff = None
     order = None
     width = None
+    weight = None
 
-    def __init__(self, image, filter, cutoff, order=0, width=0):
+    def __init__(self, image, filter, cutoff, order=0, width=0, weight=0):
 
         self.image = image
         self.cutoff = cutoff
         self.order = order
         self.width = width
+        self.weight = weight
 
         print("**FILTERING**")
         print("Filter = ", filter)
         print("Cutoff = ", cutoff)
         print("Order = ", order)
         print("Width = ", width)
+        print("Weight = ", weight)
 
         if filter == 'Ideal High Pass':
             self.filter = self.ideal_high_pass
@@ -78,12 +82,18 @@ class Filters:
         return mask
 
     def ideal_low_pass(self, shape, cutoff):
-        mask = 1 - Filters.ideal_high_pass(self, shape, cutoff)
-        print("Ideal Low Pass")
-        return mask
+        highPass = Filters.ideal_high_pass(self, shape, cutoff)
+        mask = 1 - highPass
+        if(float(self.weight) == 0):
+            print("Ideal Low Pass")
+            return mask
+        else:
+            print("Unsharp Ideal Low Pass")
+            return(1 + ((float(self.weight))*highPass))
+            # return (1-weightVar) * mask + weightVar
+
 
     def ideal_BR(self, shape, cutoff, width):
-
         D = Filters.find_freq_domain(self, shape)
         mask = np.empty(shape)
 
@@ -96,6 +106,7 @@ class Filters:
 
         print("Ideal Band Reject")
         return mask
+
     def ideal_BP(self, shape, cutoff, width):
         mask = 1 - Filters.ideal_BR(self, shape, cutoff, width)
 
@@ -116,10 +127,15 @@ class Filters:
         return mask
 
     def gaussian_low_pass(self, shape, cutoff):
-        mask = 1 - Filters.gaussian_high_pass(self, shape, cutoff)
-
-        print("Gaussian Low Pass")
-        return mask
+        highPass = Filters.gaussian_high_pass(self, shape, cutoff)
+        mask = 1 - highPass
+        if(float(self.weight) == 0):
+            print("Gaussian Low Pass")
+            return mask
+        else:
+            print("Unsharp Gaussian Low Pass")
+            return(1 + ((float(self.weight))*highPass))
+            # return (1-weightVar) * mask + weightVar
 
     def gaussian_BR(self, shape, cutoff, width):
 
@@ -157,10 +173,15 @@ class Filters:
         return mask
 
     def butterworth_low_pass(self, shape, cutoff, order):
-        mask = 1 - Filters.butterworth_high_pass(self, shape, cutoff, order)
-
-        print("Butterworth Low Pass")
-        return mask
+        highPass = Filters.butterworth_high_pass(self, shape, cutoff, order)
+        mask = 1 - highPass
+        if(float(self.weight) == 0):
+            print("Butterworth Low Pass")
+            return mask
+        else:
+            print("Unsharp Butterworth Low Pass")
+            return(1 + ((float(self.weight))*highPass))
+            # return (1-weightVar) * mask + weightVar
 
     def btw_BR(self, shape, cutoff, order, width):
 
@@ -227,39 +248,45 @@ class Filters:
 
     def FFT(self):
         print("**FFT**")
+        weightVar = float(self.weight)
+        if(weightVar == 0):
+            print("not unsharp")
+        else:
+            print("unsharp")
 
-        img = self.image
-        # 1. Compute the fft of the image
-        f = np.fft.fft2(img)
-        # 2. shift the fft to center the low frequencies
-        fshift = np.fft.fftshift(f)
-        # Magnitude of DFT
-        magnitude_dft = 20 * np.log(np.abs(fshift))
+        fft = np.fft.fft2(self.image)
+
+        #shift FFT to center low frequencies
+        shiftedFFT = np.fft.fftshift(fft)
 
         if self.filter in [self.butterworth_high_pass, self.butterworth_low_pass]:
-            mask = self.filter(fshift.shape, int(self.cutoff), int(self.order))
+            mask = self.filter(self.image.shape, int(self.cutoff), int(self.order))
         elif self.filter in [self.btw_BP, self.btw_BR]:
-            mask = self.filter(fshift.shape, int(self.cutoff), int(self.order), int(self.width))
+            mask = self.filter(self.image.shape, int(self.cutoff), int(self.order), int(self.width))
         elif self.filter in [self.ideal_BR, self.ideal_BP, self.gaussian_BR, self.gaussian_BP]:
-            mask = self.filter(fshift.shape, int(self.cutoff), int(self.width))
+            mask = self.filter(self.image.shape, int(self.cutoff), int(self.width))
         elif self.filter in [self.laplacian]:
-            mask = self.filter(fshift.shape)
+            mask = self.filter(self.image.shape)
         else:
-            mask = self.filter(fshift.shape, int(self.cutoff))
+            mask = self.filter(self.image.shape, int(self.cutoff))
 
-        # Apply mask to shifted DFT
-        filtered = fshift * mask
-        # Magnitude of filtered DFT
-        filtered_dft = 20 * np.log(np.abs(filtered))
-        # 5. compute the inverse shift1
-        f_ishift = np.fft.ifftshift(filtered)
-        # 6. compute the inverse fourier transform
-        img_back = np.fft.ifft2(f_ishift)
-        img_back = np.abs(img_back)
+        
+        #filter the image
+        filteredImage = shiftedFFT * mask
+        
+        #compute the inverse shift
+        inverseShift = np.fft.ifftshift(filteredImage)
+        
+        #compute the inverse FFT
+        inverseFFT = np.fft.ifft2(inverseShift)
 
-        # Full contrast stretch or take negative if needed
-        post_img = self.process(img_back)
+        #compute the magnitude
+        magnitude = np.absolute(inverseFFT)
+        
+        magDFT = np.log(np.absolute(shiftedFFT))
+        magDFT = self.process(magDFT).astype('uint8')
 
-        print("**COMPLETE**")
-
-        return [magnitude_dft, filtered_dft, post_img]
+        magFiltered = magDFT * mask
+        post = self.process(magnitude).astype('uint8')
+        
+        return [magDFT, magFiltered,post]
