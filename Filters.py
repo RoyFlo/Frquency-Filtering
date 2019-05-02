@@ -186,13 +186,14 @@ class Filters:
 
     def laplacian(self, shape):
         D = Filters.find_freq_domain(self, shape)
+        D = D / np.max(D)
         mask = np.empty(shape)
 
         for row in range(D.shape[0]):
             for col in range(D.shape[1]):
-                mask[row, col] = -1 * 4 * np.square(np.pi) * np.square(D[row, col])
-
-        mask = 1 - mask
+                mask[row, col] = 1 + 4. * np.square(np.pi) * np.square(D[row, col])
+        #print(mask)
+        #mask = 1. - mask
 
         print("Laplacian")
         return mask
@@ -259,7 +260,7 @@ class Filters:
 
         # Full contrast stretch or take negative if needed
         post_img = self.process(img_back)
-
+        #post_img = np.abs(255 + img_back)
         print("**COMPLETE**")
 
         return [magnitude_dft, filtered_dft, post_img]
