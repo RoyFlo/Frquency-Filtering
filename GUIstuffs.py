@@ -151,6 +151,7 @@ def run():
     cutoff = setCutoff.get()
     order = setOrder.get()
     width = setWidth.get()
+    weight = setWeight.get()
     x_val = setX.get()
     y_val = setY.get()
 
@@ -163,7 +164,7 @@ def run():
     print("Starting Timer")
 
     # Filter Image
-    obj = Filters(image, filter, cutoff, order, width, x_val, y_val)
+    obj = Filters(image, filter, cutoff, order, width, weight, x_val, y_val)
     out = obj.FFT()
 
     # Timer End

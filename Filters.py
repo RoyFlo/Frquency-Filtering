@@ -9,15 +9,17 @@ class Filters:
     cutoff = None
     order = None
     width = None
+    weight = None
     x_val = None
     y_val = None
 
-    def __init__(self, image, filter, cutoff, order=0, width=0, x_val=0, y_val=0):
+    def __init__(self, image, filter, cutoff, order=0, width=0, weight=0, x_val=0, y_val=0):
 
         self.image = image
         self.cutoff = cutoff
         self.order = order
         self.width = width
+        self.weight = weight
         self.x_val = x_val
         self.y_val = y_val
 
@@ -26,7 +28,8 @@ class Filters:
         print("Cutoff = ", cutoff)
         print("Order = ", order)
         print("Width = ", width)
-        print("Center = (", x_val, ", ", y_val, ")")
+        print("Weight = ", weight)
+        print("Center = (",x_val, ", ", y_val,")")
 
         if filter == 'Ideal High Pass':
             self.filter = self.ideal_high_pass
@@ -67,12 +70,6 @@ class Filters:
         elif filter == 'Laplacian':
             self.filter = self.laplacian
 
-
-
-
-
-
-
     def find_freq_domain(self, shape):
 
         N, M = shape
@@ -97,7 +94,6 @@ class Filters:
 
         return D
 
-
     def ideal_high_pass(self, shape, cutoff):
 
         D = Filters.find_freq_domain(self, shape)
@@ -114,9 +110,15 @@ class Filters:
         return mask
 
     def ideal_low_pass(self, shape, cutoff):
-        mask = 1 - Filters.ideal_high_pass(self, shape, cutoff)
-        print("Ideal Low Pass")
-        return mask
+        highPass = Filters.ideal_high_pass(self, shape, cutoff)
+        mask = 1 - highPass
+        if float(self.weight) == 0:
+            print("Ideal Low Pass")
+            return mask
+        else:
+            print("Unsharp Ideal Low Pass")
+            return 1 + ((float(self.weight))*highPass)
+            # return (1-weightVar) * mask + weightVar
 
     def ideal_BR(self, shape, cutoff, width):
 
@@ -175,10 +177,15 @@ class Filters:
         return mask
 
     def gaussian_low_pass(self, shape, cutoff):
-        mask = 1 - Filters.gaussian_high_pass(self, shape, cutoff)
-
-        print("Gaussian Low Pass")
-        return mask
+        highPass = Filters.gaussian_high_pass(self, shape, cutoff)
+        mask = 1 - highPass
+        if float(self.weight) == 0:
+            print("Gaussian Low Pass")
+            return mask
+        else:
+            print("Unsharp Gaussian Low Pass")
+            return 1 + ((float(self.weight))*highPass)
+            # return (1-weightVar) * mask + weightVar
 
     def gaussian_BR(self, shape, cutoff, width):
 
@@ -235,10 +242,15 @@ class Filters:
         return mask
 
     def butterworth_low_pass(self, shape, cutoff, order):
-        mask = 1 - Filters.butterworth_high_pass(self, shape, cutoff, order)
-
-        print("Butterworth Low Pass")
-        return mask
+        highPass = Filters.butterworth_high_pass(self, shape, cutoff, order)
+        mask = 1 - highPass
+        if float(self.weight) == 0:
+            print("Butterworth Low Pass")
+            return mask
+        else:
+            print("Unsharp Butterworth Low Pass")
+            return 1 + ((float(self.weight))*highPass)
+            # return (1-weightVar) * mask + weightVar
 
     def btw_BR(self, shape, cutoff, order, width):
 
@@ -326,6 +338,13 @@ class Filters:
     def FFT(self):
         print("**FFT**")
 
+        weightVar = float(self.weight)
+        if weightVar == 0:
+            print("not unsharp")
+        else:
+            print("unsharp")
+
+
         img = self.image
         # 1. Compute the fft of the image
         f = np.fft.fft2(img)
@@ -363,5 +382,5 @@ class Filters:
         post_img = self.process(img_back)
 
         print("**COMPLETE**")
-
+        
         return [magnitude_dft, filtered_dft, post_img]
