@@ -207,13 +207,12 @@ class Filters:
 
     def laplacian(self, shape):
         D = Filters.find_freq_domain(self, shape)
+        D = D / np.max(D)
         mask = np.empty(shape)
 
         for row in range(D.shape[0]):
             for col in range(D.shape[1]):
-                mask[row, col] = -1 * 4 * np.square(np.pi) * np.square(D[row, col])
-
-        mask = 1 - mask
+                mask[row, col] = 1 + 4. * np.square(np.pi) * np.square(D[row, col])
 
         print("Laplacian")
         return mask
