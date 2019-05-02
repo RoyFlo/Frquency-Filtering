@@ -9,7 +9,7 @@ class Filters:
     cutoff = None
     order = None
     width = None
-    weight = None
+    weight = 0
     x_val = None
     y_val = None
 
@@ -344,7 +344,6 @@ class Filters:
         else:
             print("unsharp")
 
-
         img = self.image
         # 1. Compute the fft of the image
         f = np.fft.fft2(img)
@@ -382,5 +381,6 @@ class Filters:
         post_img = self.process(img_back)
 
         print("**COMPLETE**")
-        
+
         return [magnitude_dft, filtered_dft, post_img]
+
