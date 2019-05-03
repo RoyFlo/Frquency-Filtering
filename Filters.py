@@ -1,7 +1,8 @@
 import numpy as np
 import cv2
 import math
-import time
+
+
 
 
 class Filters:
@@ -9,43 +10,67 @@ class Filters:
     filter = None
     cutoff = None
     order = None
+    width = None
+    weight = None
 
-    def __init__(self, image, filter, cutoff, order=0):
+    def __init__(self, image, filter, cutoff, order=0, width=0, weight=0):
 
         self.image = image
         self.cutoff = cutoff
         self.order = order
+        self.width = width
+        self.weight = weight
 
         print("**FILTERING**")
         print("Filter = ", filter)
         print("Cutoff = ", cutoff)
         print("Order = ", order)
+        print("Width = ", width)
+        print("Weight = ", weight)
 
         if filter == 'Ideal High Pass':
             self.filter = self.ideal_high_pass
         elif filter == 'Ideal Low Pass':
             self.filter = self.ideal_low_pass
+        elif filter == 'Ideal Band Reject':
+            self.filter = self.ideal_BR
+        elif filter == 'Ideal Band Pass':
+            self.filter = self.ideal_BP
         elif filter == 'Gaussian High Pass':
             self.filter = self.gaussian_high_pass
         elif filter == 'Gaussian Low Pass':
             self.filter = self.gaussian_low_pass
+        elif filter == 'Gaussian Band Reject':
+            self.filter = self.gaussian_BR
+        elif filter == 'Gaussian Band Pass':
+            self.filter = self.gaussian_BP
+        elif filter == 'Butterworth Band Reject':
+            self.filter = self.btw_BR
+        elif filter == 'Butterworth Band Pass':
+            self.filter = self.btw_BP
         elif filter == 'Butterworth High Pass':
             self.filter = self.butterworth_high_pass
         elif filter == 'Butterworth Low Pass':
             self.filter = self.butterworth_low_pass
+        elif filter == 'Laplacian':
+            self.filter = self.laplacian
 
 
-    def ideal_high_pass(self, shape, cutoff):
+    def find_freq_domain(self, shape):
+
         N, M = shape
         P = N / 2
         Q = M / 2
-
         D = np.empty(shape)
-        mask = np.empty(shape)
-
         for row in range(D.shape[0]):
             for col in range(D.shape[1]):
                 D[row, col] = np.sqrt(((row - P) * (row - P)) + ((col - Q) * (col - Q)))
+
+        return D
+    def ideal_high_pass(self, shape, cutoff):
+
+        D = Filters.find_freq_domain(self, shape)
+        mask = np.empty(shape)
 
         for row in range(mask.shape[0]):
             for col in range(mask.shape[1]):
@@ -58,38 +83,40 @@ class Filters:
         return mask
 
     def ideal_low_pass(self, shape, cutoff):
-        N, M = shape
-        P = N/2
-        Q = M/2
+        highPass = Filters.ideal_high_pass(self, shape, cutoff)
+        mask = 1 - highPass
+        if(float(self.weight) == 0):
+            print("Ideal Low Pass")
+            return mask
+        else:
+            print("Unsharp Ideal Low Pass")
+            return(1 + ((float(self.weight))*highPass))
+            # return (1-weightVar) * mask + weightVar
 
-        D = np.empty(shape)
+
+    def ideal_BR(self, shape, cutoff, width):
+        D = Filters.find_freq_domain(self, shape)
         mask = np.empty(shape)
-
-        for row in range(D.shape[0]):
-            for col in range(D.shape[1]):
-                D[row, col] = np.sqrt(((row - P)*(row - P)) + ((col - Q)*(col - Q)))
 
         for row in range(mask.shape[0]):
             for col in range(mask.shape[1]):
-                if D[row, col] <= cutoff:
-                    mask[row, col] = 1
-                if D[row, col] > cutoff:
+                if (cutoff - width / 2 <= D[row, col]) and (D[row, col] <= cutoff + width / 2):
                     mask[row, col] = 0
+                else:
+                    mask[row, col] = 1
 
-        print("Ideal Low Pass")
+        print("Ideal Band Reject")
+        return mask
+
+    def ideal_BP(self, shape, cutoff, width):
+        mask = 1 - Filters.ideal_BR(self, shape, cutoff, width)
+
+        print("Ideal Band Pass")
         return mask
 
     def gaussian_high_pass(self, shape, cutoff):
-        N, M = shape
-        P = N / 2
-        Q = M / 2
-
-        D = np.empty(shape)
+        D = Filters.find_freq_domain(self, shape)
         mask = np.empty(shape)
-
-        for row in range(D.shape[0]):
-            for col in range(D.shape[1]):
-                D[row, col] = np.sqrt(((row - P) * (row - P)) + ((col - Q) * (col - Q)))
 
         sig = 2 * (cutoff ** 2)
 
@@ -101,37 +128,41 @@ class Filters:
         return mask
 
     def gaussian_low_pass(self, shape, cutoff):
-        N, M = shape
-        P = N / 2
-        Q = M / 2
+        highPass = Filters.gaussian_high_pass(self, shape, cutoff)
+        mask = 1 - highPass
+        if(float(self.weight) == 0):
+            print("Gaussian Low Pass")
+            return mask
+        else:
+            print("Unsharp Gaussian Low Pass")
+            return(1 + ((float(self.weight))*highPass))
+            # return (1-weightVar) * mask + weightVar
 
-        D = np.empty(shape)
+    def gaussian_BR(self, shape, cutoff, width):
+
+        D = Filters.find_freq_domain(self, shape)
         mask = np.empty(shape)
 
-        for row in range(D.shape[0]):
-            for col in range(D.shape[1]):
-                D[row, col] = np.sqrt(((row - P) * (row - P)) + ((col - Q) * (col - Q)))
+        for row in range(mask.shape[0]):
+            for col in range(mask.shape[1]):
+                if D[row, col] != 0:
+                    mask[row, col] = 1 - np.exp(-1 * np.square((np.square(D[row, col]) - np.square(cutoff)) / (D[row, col]
+                                                * width)))
+                else:
+                    mask[row, col] = 1 - np.exp(-1 * np.square((np.square(D[row, col]) - np.square(cutoff)) / width))
 
-        sig = 2 * (cutoff ** 2)
+        print("Gaussian Band Reject")
+        return mask
 
-        for row in range(D.shape[0]):
-            for col in range(D.shape[1]):
-                mask[row, col] = math.exp(-(D[row, col]**2) / sig)
+    def gaussian_BP(self, shape, cutoff, width):
+        mask = 1 - Filters.gaussian_BR(self, shape, cutoff, width)
 
-        print("Gaussian Low Pass")
+        print("Gaussian Band Pass")
         return mask
 
     def butterworth_high_pass(self, shape, cutoff, order):
-        N, M = shape
-        P = N / 2
-        Q = M / 2
-
-        D = np.empty(shape)
+        D = Filters.find_freq_domain(self, shape)
         mask = np.empty(shape)
-
-        for row in range(D.shape[0]):
-            for col in range(D.shape[1]):
-                D[row, col] = np.sqrt(((row - P) * (row - P)) + ((col - Q) * (col - Q)))
 
         newOrder = 2 * order
 
@@ -143,24 +174,48 @@ class Filters:
         return mask
 
     def butterworth_low_pass(self, shape, cutoff, order):
-        N, M = shape
-        P = N / 2
-        Q = M / 2
+        highPass = Filters.butterworth_high_pass(self, shape, cutoff, order)
+        mask = 1 - highPass
+        if(float(self.weight) == 0):
+            print("Butterworth Low Pass")
+            return mask
+        else:
+            print("Unsharp Butterworth Low Pass")
+            return(1 + ((float(self.weight))*highPass))
+            # return (1-weightVar) * mask + weightVar
 
-        D = np.empty(shape)
+    def btw_BR(self, shape, cutoff, order, width):
+
+        D = Filters.find_freq_domain(self, shape)
+        mask = np.empty(shape)
+
+        for row in range(mask.shape[0]):
+            for col in range(mask.shape[1]):
+                if np.square(D[row, col]) - np.square(cutoff) != 0:
+                    mask[row, col] = 1 / (1 + np.power(D[row, col] * width / (np.square(D[row, col]) - np.square(cutoff))
+                                                      , 2 * order))
+                else:
+                    mask[row, col] = 1 / (1 + np.power(D[row, col] * width, 2 * order))
+
+        print("Butterworth Band Reject")
+        return mask
+
+    def btw_BP(self, shape, cutoff, order, width):
+        mask = 1 - Filters.btw_BR(self, shape, cutoff, order,  width)
+
+        print("Butterworth Band Pass")
+        return mask
+
+    def laplacian(self, shape):
+        D = Filters.find_freq_domain(self, shape)
+        D = D / np.max(D)
         mask = np.empty(shape)
 
         for row in range(D.shape[0]):
             for col in range(D.shape[1]):
-                D[row, col] = np.sqrt(((row - P) * (row - P)) + ((col - Q) * (col - Q)))
+                mask[row, col] = 1 + 4. * np.square(np.pi) * np.square(D[row, col])
 
-        newOrder = 2 * order
-
-        for row in range(D.shape[0]):
-            for col in range(D.shape[1]):
-                mask[row, col] = 1 / (1 + (D[row, col] / cutoff) ** newOrder)
-
-        print("Butterworth Low Pass")
+        print("Laplacian")
         return mask
 
     def process(self, image):
@@ -191,57 +246,78 @@ class Filters:
 
         return img
 
+    # creating symmetry in fft algorithm to optimize
+    def fft_sym(self, image):
+        img = image.copy()
+        (h, w) = image.shape
+        pie = (2 * math.pi) / h
+
+        #fft2 = np.zeros((h,w),dtype=complex)
+        fft2 = [i[:] for i in [[0] * w] * (h)]
+        for i in range(h // 2):
+            for j in range(w):
+                temp_sum = complex(0)
+                for u in range(0, h, 2):
+                    for v in range(0, w, 2):
+                        temp1 = img[u][v] ** (-1 * 1j * (pie * (u * i + v * j)))
+                        temp2 = img[u + 1][v] ** (-1 * 1j * (pie * ((u + 1) * i + v * j)))
+                        temp3 = img[u][v + 1] ** (-1 * 1j * (pie * (u * i + (v + 1) * j)))
+                        temp4 = img[u + 1][v + 1] ** (-1 * 1j * (pie * ((u + 1) * i + (v + 1) * j)))
+
+                        temp_sum += temp1 + temp2 + temp3 + temp4
+
+                fft2[i][j] = temp_sum
+            print("its still running...")
+
+        # fft2.extend(fft2[::-1])
+        for i in range(h//2, h):
+            fft2.insert(i, fft2[h//2 - i][::-1])
+
+        #m = array(fft2)
+        return fft2
+
     def FFT(self):
         print("**FFT**")
+        weightVar = float(self.weight)
+        if(weightVar == 0):
+            print("not unsharp")
+        else:
+            print("unsharp")
 
-        img = self.image
-        # 1. Compute the fft of the image
-        f = np.fft.fft2(img)
-        # 2. shift the fft to center the low frequencies
-        fshift = np.fft.fftshift(f)
-        # Magnitude of DFT
-        magnitude_dft = 20 * np.log(np.abs(fshift))
+        #fft = np.fft.fft2(self.image)
+        fft = self.fft_sym(self.image)
+
+        #shift FFT to center low frequencies
+        shiftedFFT = np.fft.fftshift(fft)
 
         if self.filter in [self.butterworth_high_pass, self.butterworth_low_pass]:
-            mask = self.filter(fshift.shape, int(self.cutoff), int(self.order))
+            mask = self.filter(self.image.shape, int(self.cutoff), int(self.order))
+        elif self.filter in [self.btw_BP, self.btw_BR]:
+            mask = self.filter(self.image.shape, int(self.cutoff), int(self.order), int(self.width))
+        elif self.filter in [self.ideal_BR, self.ideal_BP, self.gaussian_BR, self.gaussian_BP]:
+            mask = self.filter(self.image.shape, int(self.cutoff), int(self.width))
+        elif self.filter in [self.laplacian]:
+            mask = self.filter(self.image.shape)
         else:
-            mask = self.filter(fshift.shape, int(self.cutoff))
+            mask = self.filter(self.image.shape, int(self.cutoff))
 
-        # Apply mask to shifted DFT
-        filtered = fshift * mask
-        # Magnitude of filtered DFT
-        filtered_dft = 20 * np.log(np.abs(filtered))
-        # 5. compute the inverse shift1
-        f_ishift = np.fft.ifftshift(filtered)
-        # 6. compute the inverse fourier transform
-        img_back = np.fft.ifft2(f_ishift)
-        img_back = np.abs(img_back)
+        
+        #filter the image
+        filteredImage = shiftedFFT * mask
+        
+        #compute the inverse shift
+        inverseShift = np.fft.ifftshift(filteredImage)
+        
+        #compute the inverse FFT
+        inverseFFT = np.fft.ifft2(inverseShift)
 
-        # Full contrast stretch or take negative if needed
-        post_img = self.process(img_back)
+        #compute the magnitude
+        magnitude = np.absolute(inverseFFT)
+        
+        magDFT = np.log(np.absolute(shiftedFFT))
+        magDFT = self.process(magDFT).astype('uint8')
 
-        print("**COMPLETE**")
-
-        return [magnitude_dft, filtered_dft, post_img]
-
-    """ Computes forward Fourier transform of input image. 2d matrix image.
-        Returns dft in ndarray format. Test runtime speed of self built function with built-in
-        np fft - fft2 functions. """
-    def built_fft(self):
-        print("**Test case (own) DFT**")
-        print("Timer for own DFT started...")
-        start_time = time.time()
-
-        img = self.image
-
-        (h, w) = img.shape
-        fwd_trans = np.array(
-            [[sum([(img[i][j] * math.exp(-1 * math.sqrt(-1) * ((2 * math.pi) / h) * (u * i + v * j)))
-                   for i in range(h) for j in range(w)]) for v in range(w)] for u in range(h)])
-
-        end_time = time.time()
-        print("Timer for own DFT Stopped")
-        t = float("{0:.3f}".format(end_time - start_time))
-        print("Total Time for own DFT = ", t)
-
-        return fwd_trans
+        magFiltered = magDFT * mask
+        post = self.process(magnitude).astype('uint8')
+        
+        return [magDFT, magFiltered,post]
