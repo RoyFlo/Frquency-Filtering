@@ -11,15 +11,28 @@ class Filters:
     cutoff = None
     order = None
     width = None
+<<<<<<< HEAD
     weight = None
 
     def __init__(self, image, filter, cutoff, order=0, width=0, weight=0):
+=======
+    weight = 0
+    x_val = None
+    y_val = None
+
+    def __init__(self, image, filter, cutoff, order=0, width=0, weight=0, x_val=0, y_val=0):
+>>>>>>> NoelBranch
 
         self.image = image
         self.cutoff = cutoff
         self.order = order
         self.width = width
         self.weight = weight
+<<<<<<< HEAD
+=======
+        self.x_val = x_val
+        self.y_val = y_val
+>>>>>>> NoelBranch
 
         print("**FILTERING**")
         print("Filter = ", filter)
@@ -27,6 +40,10 @@ class Filters:
         print("Order = ", order)
         print("Width = ", width)
         print("Weight = ", weight)
+<<<<<<< HEAD
+=======
+        print("Center = (",x_val, ", ", y_val,")")
+>>>>>>> NoelBranch
 
         if filter == 'Ideal High Pass':
             self.filter = self.ideal_high_pass
@@ -36,6 +53,10 @@ class Filters:
             self.filter = self.ideal_BR
         elif filter == 'Ideal Band Pass':
             self.filter = self.ideal_BP
+        elif filter == 'Ideal Notch Reject':
+            self.filter = self.ideal_NR
+        elif filter == 'Ideal Notch Pass':
+            self.filter = self.ideal_NP
         elif filter == 'Gaussian High Pass':
             self.filter = self.gaussian_high_pass
         elif filter == 'Gaussian Low Pass':
@@ -44,6 +65,10 @@ class Filters:
             self.filter = self.gaussian_BR
         elif filter == 'Gaussian Band Pass':
             self.filter = self.gaussian_BP
+        elif filter == 'Gaussian Notch Reject':
+            self.filter = self.gaussian_NR
+        elif filter == 'Gaussian Notch Pass':
+            self.filter = self. gaussian_NP
         elif filter == 'Butterworth Band Reject':
             self.filter = self.btw_BR
         elif filter == 'Butterworth Band Pass':
@@ -52,9 +77,12 @@ class Filters:
             self.filter = self.butterworth_high_pass
         elif filter == 'Butterworth Low Pass':
             self.filter = self.butterworth_low_pass
+        elif filter == 'Butterworth Notch Reject':
+            self.filter = self.btw_NR
+        elif filter == 'Butterworth Notch Pass':
+            self.filter = self.btw_NP
         elif filter == 'Laplacian':
             self.filter = self.laplacian
-
 
     def find_freq_domain(self, shape):
 
@@ -67,6 +95,19 @@ class Filters:
                 D[row, col] = np.sqrt(((row - P) * (row - P)) + ((col - Q) * (col - Q)))
 
         return D
+
+    def notch_freq_domain(self, shape, x_val, y_val):
+
+        N, M = shape
+        P = N / 2
+        Q = M / 2
+        D = np.empty(shape)
+        for row in range(D.shape[0]):
+            for col in range(D.shape[1]):
+                D[row, col] = np.sqrt(np.square(row - P - x_val) + np.square(col - Q - y_val))
+
+        return D
+
     def ideal_high_pass(self, shape, cutoff):
 
         D = Filters.find_freq_domain(self, shape)
@@ -85,12 +126,20 @@ class Filters:
     def ideal_low_pass(self, shape, cutoff):
         highPass = Filters.ideal_high_pass(self, shape, cutoff)
         mask = 1 - highPass
+<<<<<<< HEAD
         if(float(self.weight) == 0):
+=======
+        if float(self.weight) == 0:
+>>>>>>> NoelBranch
             print("Ideal Low Pass")
             return mask
         else:
             print("Unsharp Ideal Low Pass")
+<<<<<<< HEAD
             return(1 + ((float(self.weight))*highPass))
+=======
+            return 1 + ((float(self.weight))*highPass)
+>>>>>>> NoelBranch
             # return (1-weightVar) * mask + weightVar
 
 
@@ -114,6 +163,28 @@ class Filters:
         print("Ideal Band Pass")
         return mask
 
+    def ideal_NR(self, shape, cutoff, x_val, y_val):
+        D1 = Filters.notch_freq_domain(self, shape, x_val, y_val)
+        D2 = Filters.notch_freq_domain(self, shape, -x_val, -y_val)
+        mask = np.empty(shape)
+        for row in range(mask.shape[0]):
+            for col in range(mask.shape[1]):
+                if (D1[row, col] <= cutoff) or (D2[row, col] <= cutoff):
+                    mask[row, col] = 0
+                else:
+                    mask[row, col] = 1
+
+        print("Ideal Notch Reject")
+
+        return mask
+
+    def ideal_NP(self, shape, cutoff, x_val, y_val):
+        mask = 1 - Filters.ideal_NR(self, shape, cutoff, x_val, y_val)
+
+        print("Ideal Notch Pass")
+
+        return mask
+
     def gaussian_high_pass(self, shape, cutoff):
         D = Filters.find_freq_domain(self, shape)
         mask = np.empty(shape)
@@ -130,12 +201,20 @@ class Filters:
     def gaussian_low_pass(self, shape, cutoff):
         highPass = Filters.gaussian_high_pass(self, shape, cutoff)
         mask = 1 - highPass
+<<<<<<< HEAD
         if(float(self.weight) == 0):
+=======
+        if float(self.weight) == 0:
+>>>>>>> NoelBranch
             print("Gaussian Low Pass")
             return mask
         else:
             print("Unsharp Gaussian Low Pass")
+<<<<<<< HEAD
             return(1 + ((float(self.weight))*highPass))
+=======
+            return 1 + ((float(self.weight))*highPass)
+>>>>>>> NoelBranch
             # return (1-weightVar) * mask + weightVar
 
     def gaussian_BR(self, shape, cutoff, width):
@@ -160,6 +239,25 @@ class Filters:
         print("Gaussian Band Pass")
         return mask
 
+    def gaussian_NR(self, shape, cutoff, x_val, y_val):
+        D1 = Filters.notch_freq_domain(self, shape, x_val, y_val)
+        D2 = Filters.notch_freq_domain(self, shape, -x_val, -y_val)
+        mask = np.empty(shape)
+
+        for row in range(mask.shape[0]):
+            for col in range(mask.shape[1]):
+                mask[row, col] = 1 - math.exp(-.5 * ((D1[row, col] * D2[row, col])/np.square(cutoff)))
+
+        print("Gaussian Notch Reject")
+
+        return mask
+
+    def gaussian_NP(self, shape, cutoff, x_val, y_val):
+        mask = 1 - Filters.gaussian_NR(self, shape, cutoff, x_val, y_val)
+
+        print("Gaussian Notch Pass")
+        return mask
+
     def butterworth_high_pass(self, shape, cutoff, order):
         D = Filters.find_freq_domain(self, shape)
         mask = np.empty(shape)
@@ -176,12 +274,20 @@ class Filters:
     def butterworth_low_pass(self, shape, cutoff, order):
         highPass = Filters.butterworth_high_pass(self, shape, cutoff, order)
         mask = 1 - highPass
+<<<<<<< HEAD
         if(float(self.weight) == 0):
+=======
+        if float(self.weight) == 0:
+>>>>>>> NoelBranch
             print("Butterworth Low Pass")
             return mask
         else:
             print("Unsharp Butterworth Low Pass")
+<<<<<<< HEAD
             return(1 + ((float(self.weight))*highPass))
+=======
+            return 1 + ((float(self.weight))*highPass)
+>>>>>>> NoelBranch
             # return (1-weightVar) * mask + weightVar
 
     def btw_BR(self, shape, cutoff, order, width):
@@ -196,7 +302,6 @@ class Filters:
                                                       , 2 * order))
                 else:
                     mask[row, col] = 1 / (1 + np.power(D[row, col] * width, 2 * order))
-
         print("Butterworth Band Reject")
         return mask
 
@@ -204,6 +309,27 @@ class Filters:
         mask = 1 - Filters.btw_BR(self, shape, cutoff, order,  width)
 
         print("Butterworth Band Pass")
+        return mask
+
+    def btw_NR(self, shape, cutoff, order, x_val, y_val):
+        D1 = Filters.notch_freq_domain(self, shape, x_val, y_val)
+        D2 = Filters.notch_freq_domain(self, shape, -x_val, -y_val)
+        mask = np.empty(shape)
+
+        for row in range(mask.shape[0]):
+            for col in range(mask.shape[1]):
+                if D1[row, col] * D2[row, col] != 0:
+                    mask[row, col] = 1 / (1 + np.power(np.square(cutoff)/(D1[row, col] * D2[row, col]), order))
+                else:
+                    mask[row, col] = 1 / (1 + np.power(np.square(cutoff), order))
+
+        print("Butterworth Notch Reject")
+        return mask
+
+    def btw_NP(self, shape, cutoff, order, x_val, y_val):
+        mask = 1 - Filters.btw_NR(self, shape, cutoff, order, x_val, y_val)
+
+        print("Butterworth Notch Pass")
         return mask
 
     def laplacian(self, shape):
@@ -256,18 +382,45 @@ class Filters:
 
         fft = np.fft.fft2(self.image)
 
+<<<<<<< HEAD
         #shift FFT to center low frequencies
         shiftedFFT = np.fft.fftshift(fft)
+=======
+        weightVar = float(self.weight)
+        if weightVar == 0:
+            print("not unsharp")
+        else:
+            print("unsharp")
+
+        img = self.image
+        # 1. Compute the fft of the image
+        f = np.fft.fft2(img)
+        # 2. shift the fft to center the low frequencies
+        fshift = np.fft.fftshift(f)
+        # Magnitude of DFT
+        magnitude_dft = 20 * np.log(np.abs(fshift))
+>>>>>>> NoelBranch
 
         if self.filter in [self.butterworth_high_pass, self.butterworth_low_pass]:
             mask = self.filter(self.image.shape, int(self.cutoff), int(self.order))
         elif self.filter in [self.btw_BP, self.btw_BR]:
+<<<<<<< HEAD
             mask = self.filter(self.image.shape, int(self.cutoff), int(self.order), int(self.width))
         elif self.filter in [self.ideal_BR, self.ideal_BP, self.gaussian_BR, self.gaussian_BP]:
             mask = self.filter(self.image.shape, int(self.cutoff), int(self.width))
+=======
+            mask = self.filter(fshift.shape, int(self.cutoff), int(self.order), int(self.width))
+        elif self. filter in [self.btw_NR, self.btw_NP]:
+            mask = self.filter(fshift.shape, int(self.cutoff), int(self.order), int(self.x_val), int(self.y_val))
+        elif self.filter in [self.ideal_BR, self.ideal_BP, self.gaussian_BR, self.gaussian_BP]:
+            mask = self.filter(fshift.shape, int(self.cutoff), int(self.width))
+        elif self.filter in [self.ideal_NR, self.ideal_NP, self.gaussian_NR, self.gaussian_NP]:
+            mask = self.filter(fshift.shape, int(self.cutoff), int(self.x_val), int(self.y_val))
+>>>>>>> NoelBranch
         elif self.filter in [self.laplacian]:
             mask = self.filter(self.image.shape)
         else:
+<<<<<<< HEAD
             mask = self.filter(self.image.shape, int(self.cutoff))
 
         
@@ -304,3 +457,24 @@ class Filters:
         a = np.concatenate((fwd_trans, mirror))
 
         return a
+=======
+            mask = self.filter(fshift.shape, int(self.cutoff))
+
+        # Apply mask to shifted DFT
+        filtered = fshift * mask
+        # Magnitude of filtered DFT
+        filtered_dft = 20 * np.log(np.abs(filtered))
+        # 5. compute the inverse shift1
+        f_ishift = np.fft.ifftshift(filtered)
+        # 6. compute the inverse fourier transform
+        img_back = np.fft.ifft2(f_ishift)
+        img_back = np.abs(img_back)
+
+        # Full contrast stretch or take negative if needed
+        post_img = self.process(img_back)
+
+        print("**COMPLETE**")
+
+        return [magnitude_dft, filtered_dft, post_img]
+
+>>>>>>> NoelBranch

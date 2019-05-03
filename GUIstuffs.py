@@ -14,9 +14,12 @@ from skimage.io import imread
 from decimal import Decimal
 import cv2
 import time
+<<<<<<< HEAD
 
 from datetime import datetime
 import sys
+=======
+>>>>>>> NoelBranch
 
 from Filters import Filters
 
@@ -48,6 +51,8 @@ Label(window, text="3. Enter Cutoff", font=("Ariel", 12), fg="blue").grid(row=0,
 Label(window, text="4. Enter Order", font=("Ariel", 12), fg="blue").grid(row=0, column=3)
 Label(window, text="5. Enter Weight", font=("Ariel", 12), fg="blue").grid(row=0, column=4)
 Label(window, text="6. Enter Width", font=("Ariel", 12), fg="blue").grid(row=0, column=5)
+Label(window, text="7. Enter X:", font=("Ariel", 12), fg="blue").grid(row=0, column=6)
+Label(window, text="   Enter Y:", font=("Ariel", 12), fg="blue").grid(row=0, column=7)
 
 
 # Sets the defaults of the program
@@ -75,9 +80,12 @@ def fValue(value):
 
 
 iList = ["Image1", "Image2", "Image3", "Image4", "Image5", "Image6"]
-filterList = ["Ideal High Pass", "Ideal Low Pass", "Ideal Band Reject", "Ideal Band Pass", "Gaussian High Pass",
-              "Gaussian Low Pass", "Gaussian Band Reject", "Gaussian Band Pass", "Butterworth High Pass",
-              "Butterworth Low Pass", "Butterworth Band Reject", "Butterworth Band Pass","Laplacian", ]
+
+filterList = ["Ideal High Pass", "Ideal Low Pass", "Ideal Band Reject", "Ideal Band Pass", "Ideal Notch Reject",
+              "Ideal Notch Pass", "Gaussian High Pass", "Gaussian Low Pass", "Gaussian Band Reject",
+              "Gaussian Band Pass", "Gaussian Notch Reject", "Gaussian Notch Pass", "Butterworth High Pass",
+              "Butterworth Low Pass", "Butterworth Band Reject", "Butterworth Band Pass", "Butterworth Notch Reject",
+              "Butterworth Notch Pass" , "Laplacian", ]
 
 # Image Var
 var1 = StringVar()
@@ -96,7 +104,13 @@ var5 = StringVar()
 var5.set(0)
 # Width Var
 var6 = StringVar()
-var6.set(2)
+var6.set(None)
+# Center X - Var
+var7 = StringVar()
+var7.set(None)
+# Center Y - Var
+var8 = StringVar()
+var8.set(None)
 
 def selectImg():
     imgname = askopenfilename()
@@ -129,6 +143,16 @@ setWidth = Entry(window, textvariable=var6, width=10)
 setWidth.configure(font="Times")
 setWidth.grid(row=1, column=5, padx=5)
 
+# Width Entry
+setX = Entry(window, textvariable=var7, width=10)
+setX.configure(font="Times")
+setX.grid(row=1, column=6, padx=5)
+
+# Width Entry
+setY = Entry(window, textvariable=var8, width=10)
+setY.configure(font="Times")
+setY.grid(row=1, column=7, padx=5)
+
 # Figure for the graphs
 fig = plt.figure(figsize=(7, 7))
 canvas = FigureCanvasTkAgg(fig, master=window)
@@ -140,6 +164,11 @@ def run():
     order = setOrder.get()
     width = setWidth.get()
     weight = setWeight.get()
+<<<<<<< HEAD
+=======
+    x_val = setX.get()
+    y_val = setY.get()
+>>>>>>> NoelBranch
 
     # Load image
     print("Uploading " + img)
@@ -150,7 +179,11 @@ def run():
     print("Starting Timer")
 
     # Filter Image
+<<<<<<< HEAD
     obj = Filters(image, filter, cutoff, order, width, weight)
+=======
+    obj = Filters(image, filter, cutoff, order, width, weight, x_val, y_val)
+>>>>>>> NoelBranch
     out = obj.FFT()
 
     # Timer End
@@ -184,6 +217,10 @@ def run():
     a3.set_title("Mask")
 
     # Resulting Image display
+<<<<<<< HEAD
+=======
+
+>>>>>>> NoelBranch
     a4 = fig.add_subplot(224)
     a4.imshow(out[2], cmap='binary_r')
     a4.axis('off')
@@ -206,6 +243,6 @@ def run():
 
 # RUN button
 button1 = Button(window, text="**RUN**", bg="red", font=("Times", 15), command=run, cursor='spraycan')
-button1.grid(row=1, column=6, padx=30, pady=15)
+button1.grid(row=1, column=8, padx=30, pady=15)
 
 window.mainloop()
