@@ -2,6 +2,8 @@ import numpy as np
 from numpy import array
 import cv2
 import math
+import cmath
+
 
 
 
@@ -14,8 +16,9 @@ class Filters:
     weight = None
     x_val = None
     y_val = None
+    whichFFT = 0
 
-    def __init__(self, image, filter, cutoff, order=0, width=0, weight=0, x_val=0, y_val=0):
+    def __init__(self, image, filter, cutoff, order=0, width=0, weight=0, x_val=0, y_val=0, whichFFT=0):
 
 
         self.image = image
@@ -25,6 +28,7 @@ class Filters:
         self.weight = weight
         self.x_val = x_val
         self.y_val = y_val
+        self.whichFFT = whichFFT
 
 
         print("**FILTERING**")
@@ -34,6 +38,10 @@ class Filters:
         print("Width = ", width)
         print("Weight = ", weight)
         print("Center = (",x_val, ", ", y_val,")")
+        if whichFFT == 0:
+            print("Built-in FFT")
+        if whichFFT == 1:
+            print("Own FFT")
 
 
         if filter == 'Ideal High Pass':
@@ -361,12 +369,12 @@ class Filters:
 
         img = self.image
         # 1. Compute the fft of the image
-        f = np.fft.fft2(img)
+        if(self.whichFFT == 1):
+            f = self.fft_symmetry(img)
+        if(self.whichFFT == 0):
+            f = np.fft.fft2(img)
         # 2. shift the fft to center the low frequencies
         fshift = np.fft.fftshift(f)
-        # Magnitude of DFT
-        magnitude_dft = 20 * np.log(np.abs(fshift))
-
 
         if self.filter in [self.butterworth_high_pass, self.butterworth_low_pass]:
             mask = self.filter(self.image.shape, int(self.cutoff), int(self.order))
@@ -385,7 +393,7 @@ class Filters:
 
         
         #filter the image
-        filteredImage = shiftedFFT * mask
+        filteredImage = fshift * mask
         
         #compute the inverse shift
         inverseShift = np.fft.ifftshift(filteredImage)
@@ -396,7 +404,7 @@ class Filters:
         #compute the magnitude
         magnitude = np.absolute(inverseFFT)
         
-        magDFT = np.log(np.absolute(shiftedFFT))
+        magDFT = np.log(np.absolute(fshift))
         magDFT = self.process(magDFT).astype('uint8')
 
         magFiltered = magDFT * mask
@@ -409,7 +417,7 @@ class Filters:
         """Computes the forward Fourier transform using symmetry"""
 
         (h, w) = matrix.shape
-        fwd_trans = np.array([[sum([(matrix[i][j] * math.exp(-1 * math.sqrt(-1) * ((2*math.pi)/h) * (u*i + v*j)))
+        fwd_trans = np.array([[sum([(matrix[i][j] * cmath.exp(-1 * 1j * ((2*math.pi)/h) * (u*i + v*j)))
                                     for i in range(h) for j in range(w)]) for v in range(w)] for u in range(h//2)])
 
         fwd_mirror = fwd_trans[::][::-1]

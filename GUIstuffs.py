@@ -155,6 +155,10 @@ canvas = FigureCanvasTkAgg(fig, master=window)
 
 def run():
     print("***RUNNING***")
+    if(setFFT.get() == 0):
+        print("Using Built-in FFT")
+    if(setFFT.get() == 1):
+        print("Using own FFT")
 
     cutoff = setCutoff.get()
     order = setOrder.get()
@@ -162,7 +166,7 @@ def run():
     weight = setWeight.get()
     x_val = setX.get()
     y_val = setY.get()
-
+    whichFFT = setFFT.get()
 
     # Load image
     print("Uploading " + img)
@@ -174,7 +178,7 @@ def run():
 
     # Filter Image
 
-    obj = Filters(image, filter, cutoff, order, width, weight, x_val, y_val)
+    obj = Filters(image, filter, cutoff, order, width, weight, x_val, y_val, whichFFT)
 
     out = obj.FFT()
 
@@ -228,9 +232,12 @@ def run():
     Label(window, text=msg, font=("Times", 15), fg="red").grid(row=3, sticky=NE)
     canvas.draw()
 
+setFFT = IntVar()
+button2 = Checkbutton(window, text = "OUR FFT", font=("Times", 15), variable = setFFT, onvalue = 1, offvalue = 0, selectcolor = 'black')
+button2.grid(row=1, column=8, padx=30, pady=15)
 
 # RUN button
 button1 = Button(window, text="**RUN**", bg="red", font=("Times", 15), command=run, cursor='spraycan')
-button1.grid(row=1, column=8, padx=30, pady=15)
+button1.grid(row=1, column=9, padx=30, pady=15)
 
 window.mainloop()
