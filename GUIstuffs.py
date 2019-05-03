@@ -14,12 +14,8 @@ from skimage.io import imread
 from decimal import Decimal
 import cv2
 import time
-<<<<<<< HEAD
-
 from datetime import datetime
 import sys
-=======
->>>>>>> NoelBranch
 
 from Filters import Filters
 
@@ -164,11 +160,9 @@ def run():
     order = setOrder.get()
     width = setWidth.get()
     weight = setWeight.get()
-<<<<<<< HEAD
-=======
     x_val = setX.get()
     y_val = setY.get()
->>>>>>> NoelBranch
+
 
     # Load image
     print("Uploading " + img)
@@ -179,11 +173,9 @@ def run():
     print("Starting Timer")
 
     # Filter Image
-<<<<<<< HEAD
-    obj = Filters(image, filter, cutoff, order, width, weight)
-=======
+
     obj = Filters(image, filter, cutoff, order, width, weight, x_val, y_val)
->>>>>>> NoelBranch
+
     out = obj.FFT()
 
     # Timer End
@@ -217,10 +209,6 @@ def run():
     a3.set_title("Mask")
 
     # Resulting Image display
-<<<<<<< HEAD
-=======
-
->>>>>>> NoelBranch
     a4 = fig.add_subplot(224)
     a4.imshow(out[2], cmap='binary_r')
     a4.axis('off')
