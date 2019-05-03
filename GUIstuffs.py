@@ -37,7 +37,7 @@ def showimg(img):
 
 # Creates and sets the size of the GUI window
 window = Tk()
-window.geometry("1200x900")
+window.geometry("1500x900")
 window.title("Filtering in Frequency Domain")
 
 # Creates the text for the buttons/entries
