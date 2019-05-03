@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import array
 import cv2
 import math
 
@@ -289,3 +290,17 @@ class Filters:
         post = self.process(magnitude).astype('uint8')
         
         return [magDFT, magFiltered,post]
+
+    def fft_symmetry(self, matrix):
+        """Computes the forward Fourier transform using symmetry"""
+
+        (h, w) = matrix.shape
+        fwd_trans = np.array([[sum([(matrix[i][j] * math.exp(-1 * math.sqrt(-1) * ((2*math.pi)/h) * (u*i + v*j)))
+                                    for i in range(h) for j in range(w)]) for v in range(w)] for u in range(h//2)])
+
+        fwd_mirror = fwd_trans[::][::-1]
+        mirror = array(fwd_mirror)
+
+        a = np.concatenate((fwd_trans, mirror))
+
+        return a
