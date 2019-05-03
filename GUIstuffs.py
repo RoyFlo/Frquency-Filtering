@@ -1,3 +1,9 @@
+# to run on MAC OS (avoid uncaught error for matplotlib)
+from sys import platform as sys_pf
+if sys_pf == 'darwin':
+    import matplotlib
+    matplotlib.use("TkAgg")
+
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 import matplotlib.pyplot as plt
