@@ -11,28 +11,21 @@ class Filters:
     cutoff = None
     order = None
     width = None
-<<<<<<< HEAD
     weight = None
-
-    def __init__(self, image, filter, cutoff, order=0, width=0, weight=0):
-=======
-    weight = 0
     x_val = None
     y_val = None
 
     def __init__(self, image, filter, cutoff, order=0, width=0, weight=0, x_val=0, y_val=0):
->>>>>>> NoelBranch
+
 
         self.image = image
         self.cutoff = cutoff
         self.order = order
         self.width = width
         self.weight = weight
-<<<<<<< HEAD
-=======
         self.x_val = x_val
         self.y_val = y_val
->>>>>>> NoelBranch
+
 
         print("**FILTERING**")
         print("Filter = ", filter)
@@ -40,10 +33,8 @@ class Filters:
         print("Order = ", order)
         print("Width = ", width)
         print("Weight = ", weight)
-<<<<<<< HEAD
-=======
         print("Center = (",x_val, ", ", y_val,")")
->>>>>>> NoelBranch
+
 
         if filter == 'Ideal High Pass':
             self.filter = self.ideal_high_pass
@@ -126,20 +117,15 @@ class Filters:
     def ideal_low_pass(self, shape, cutoff):
         highPass = Filters.ideal_high_pass(self, shape, cutoff)
         mask = 1 - highPass
-<<<<<<< HEAD
-        if(float(self.weight) == 0):
-=======
+
         if float(self.weight) == 0:
->>>>>>> NoelBranch
             print("Ideal Low Pass")
             return mask
         else:
             print("Unsharp Ideal Low Pass")
-<<<<<<< HEAD
-            return(1 + ((float(self.weight))*highPass))
-=======
+
             return 1 + ((float(self.weight))*highPass)
->>>>>>> NoelBranch
+
             # return (1-weightVar) * mask + weightVar
 
 
@@ -201,20 +187,16 @@ class Filters:
     def gaussian_low_pass(self, shape, cutoff):
         highPass = Filters.gaussian_high_pass(self, shape, cutoff)
         mask = 1 - highPass
-<<<<<<< HEAD
-        if(float(self.weight) == 0):
-=======
+
         if float(self.weight) == 0:
->>>>>>> NoelBranch
+
             print("Gaussian Low Pass")
             return mask
         else:
             print("Unsharp Gaussian Low Pass")
-<<<<<<< HEAD
-            return(1 + ((float(self.weight))*highPass))
-=======
+
             return 1 + ((float(self.weight))*highPass)
->>>>>>> NoelBranch
+
             # return (1-weightVar) * mask + weightVar
 
     def gaussian_BR(self, shape, cutoff, width):
@@ -274,20 +256,16 @@ class Filters:
     def butterworth_low_pass(self, shape, cutoff, order):
         highPass = Filters.butterworth_high_pass(self, shape, cutoff, order)
         mask = 1 - highPass
-<<<<<<< HEAD
-        if(float(self.weight) == 0):
-=======
+
         if float(self.weight) == 0:
->>>>>>> NoelBranch
+
             print("Butterworth Low Pass")
             return mask
         else:
             print("Unsharp Butterworth Low Pass")
-<<<<<<< HEAD
-            return(1 + ((float(self.weight))*highPass))
-=======
+
             return 1 + ((float(self.weight))*highPass)
->>>>>>> NoelBranch
+
             # return (1-weightVar) * mask + weightVar
 
     def btw_BR(self, shape, cutoff, order, width):
@@ -374,18 +352,7 @@ class Filters:
 
     def FFT(self):
         print("**FFT**")
-        weightVar = float(self.weight)
-        if(weightVar == 0):
-            print("not unsharp")
-        else:
-            print("unsharp")
 
-        fft = np.fft.fft2(self.image)
-
-<<<<<<< HEAD
-        #shift FFT to center low frequencies
-        shiftedFFT = np.fft.fftshift(fft)
-=======
         weightVar = float(self.weight)
         if weightVar == 0:
             print("not unsharp")
@@ -399,16 +366,11 @@ class Filters:
         fshift = np.fft.fftshift(f)
         # Magnitude of DFT
         magnitude_dft = 20 * np.log(np.abs(fshift))
->>>>>>> NoelBranch
+
 
         if self.filter in [self.butterworth_high_pass, self.butterworth_low_pass]:
             mask = self.filter(self.image.shape, int(self.cutoff), int(self.order))
         elif self.filter in [self.btw_BP, self.btw_BR]:
-<<<<<<< HEAD
-            mask = self.filter(self.image.shape, int(self.cutoff), int(self.order), int(self.width))
-        elif self.filter in [self.ideal_BR, self.ideal_BP, self.gaussian_BR, self.gaussian_BP]:
-            mask = self.filter(self.image.shape, int(self.cutoff), int(self.width))
-=======
             mask = self.filter(fshift.shape, int(self.cutoff), int(self.order), int(self.width))
         elif self. filter in [self.btw_NR, self.btw_NP]:
             mask = self.filter(fshift.shape, int(self.cutoff), int(self.order), int(self.x_val), int(self.y_val))
@@ -416,11 +378,9 @@ class Filters:
             mask = self.filter(fshift.shape, int(self.cutoff), int(self.width))
         elif self.filter in [self.ideal_NR, self.ideal_NP, self.gaussian_NR, self.gaussian_NP]:
             mask = self.filter(fshift.shape, int(self.cutoff), int(self.x_val), int(self.y_val))
->>>>>>> NoelBranch
         elif self.filter in [self.laplacian]:
             mask = self.filter(self.image.shape)
         else:
-<<<<<<< HEAD
             mask = self.filter(self.image.shape, int(self.cutoff))
 
         
@@ -442,6 +402,7 @@ class Filters:
         magFiltered = magDFT * mask
         post = self.process(magnitude).astype('uint8')
         
+        print("**COMPLETE**")
         return [magDFT, magFiltered,post]
 
     def fft_symmetry(self, matrix):
@@ -457,24 +418,4 @@ class Filters:
         a = np.concatenate((fwd_trans, mirror))
 
         return a
-=======
-            mask = self.filter(fshift.shape, int(self.cutoff))
 
-        # Apply mask to shifted DFT
-        filtered = fshift * mask
-        # Magnitude of filtered DFT
-        filtered_dft = 20 * np.log(np.abs(filtered))
-        # 5. compute the inverse shift1
-        f_ishift = np.fft.ifftshift(filtered)
-        # 6. compute the inverse fourier transform
-        img_back = np.fft.ifft2(f_ishift)
-        img_back = np.abs(img_back)
-
-        # Full contrast stretch or take negative if needed
-        post_img = self.process(img_back)
-
-        print("**COMPLETE**")
-
-        return [magnitude_dft, filtered_dft, post_img]
-
->>>>>>> NoelBranch
