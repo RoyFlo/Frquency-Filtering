@@ -420,7 +420,7 @@ class Filters:
         fwd_trans = np.array([[sum([(matrix[i][j] * cmath.exp(-1 * 1j * ((2*math.pi)/h) * (u*i + v*j)))
                                     for i in range(h) for j in range(w)]) for v in range(w)] for u in range(h//2)])
 
-        fwd_mirror = fwd_trans[::][::-1]
+        fwd_mirror = [i[::-1] for i in fwd_trans[(h//2)-1:0:-1]]
         mirror = array(fwd_mirror)
 
         a = np.concatenate((fwd_trans, mirror))
