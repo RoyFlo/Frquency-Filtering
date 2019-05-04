@@ -368,6 +368,13 @@ class Filters:
             print("unsharp")
 
         img = self.image
+        # fft_symmetry is efficient for (m,m) even dimensions
+        (h, w) = img.shape
+        if h != w:
+            self.whichFFT = 0
+        elif h % 2 != 0:
+            self.whichFFT = 0
+
         # 1. Compute the fft of the image
         if(self.whichFFT == 1):
             f = self.fft_symmetry(img)
@@ -404,29 +411,28 @@ class Filters:
         #compute the magnitude
         magnitude = np.absolute(inverseFFT)
         
-        magDFT = np.log(np.absolute(fshift))
-        magDFT = self.process(magDFT).astype('uint8')
+        magDFT =20 * np.log(np.abs(fshift))
 
         magFiltered = magDFT * mask
         post = self.process(magnitude).astype('uint8')
         
         print("**COMPLETE**")
-        return [magDFT, magFiltered,post]
+        return [magDFT, magFiltered, post]
 
     def fft_symmetry(self, matrix):
         """Computes the forward Fourier transform using symmetry"""
 
         (h, w) = matrix.shape
-        fwd_trans = np.array([[sum([(matrix[i][j] * cmath.exp(-1 * 1j * ((2*math.pi)/h) * (u*i + v*j)))
-                                    for i in range(h) for j in range(w)]) for v in range(w)] for u in range((h//2)+1)])
+        fwd_trans = np.array([[sum([(matrix[i][j] * cmath.exp(-1 * 1j * ((2 * math.pi) / h) * (u * i + v * j)))
+                                    for i in range(h) for j in range(w)]) for v in range(w)] for u in
+                              range((h // 2) + 1)])
 
-        fwd_mirror = [i[::-1] for i in fwd_trans[(h//2)-1:0:-1]]
+        fwd_mirror = [i[::-1] for i in fwd_trans[(h // 2) - 1:0:-1]]
         for i in range(len(fwd_mirror)):
-            fwd_mirror[i] = np.conj(np.append(np.array(fwd_mirror[i][len(fwd_mirror[i])-1]),
-                                      np.array(fwd_mirror[i][:len(fwd_mirror[i])-1])))
+            fwd_mirror[i] = np.conj(np.append(np.array(fwd_mirror[i][len(fwd_mirror[i]) - 1]),
+                                              np.array(fwd_mirror[i][:len(fwd_mirror[i]) - 1])))
         mirror = array(fwd_mirror)
 
         a = np.concatenate((fwd_trans, mirror))
 
-        return a
-
+return a
