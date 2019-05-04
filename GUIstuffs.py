@@ -35,9 +35,11 @@ def showimg(img):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+
 # Creates and sets the size of the GUI window
 window = Tk()
-window.geometry("1200x900")
+window.state('zoomed')
+#window.geometry("1400x900")
 window.title("Filtering in Frequency Domain")
 
 # Creates the text for the buttons/entries
@@ -91,22 +93,23 @@ var2 = StringVar()
 var2.set("Ideal High Pass")
 # Cutoff Var
 var3 = StringVar()
-var3.set(75)
+var3.set(15)
 # Order Var
 var4 = StringVar()
-var4.set(2)
+var4.set(1)
 # Weight Var
 var5 = StringVar()
 var5.set(0)
 # Width Var
 var6 = StringVar()
-var6.set(None)
+var6.set(25)
 # Center X - Var
 var7 = StringVar()
-var7.set(None)
+var7.set(50)
 # Center Y - Var
 var8 = StringVar()
-var8.set(None)
+var8.set(50)
+
 
 def selectImg():
     imgname = askopenfilename()
@@ -152,6 +155,7 @@ setY.grid(row=1, column=7, padx=5)
 # Figure for the graphs
 fig = plt.figure(figsize=(7, 7))
 canvas = FigureCanvasTkAgg(fig, master=window)
+
 
 def run():
     print("***RUNNING***")
@@ -232,8 +236,9 @@ def run():
     Label(window, text=msg, font=("Times", 15), fg="red").grid(row=3, sticky=NE)
     canvas.draw()
 
+
 setFFT = IntVar()
-button2 = Checkbutton(window, text = "OUR FFT", font=("Times", 15), variable = setFFT, onvalue = 1, offvalue = 0, selectcolor = 'black')
+button2 = Checkbutton(window, text="OUR FFT", font=("Times", 15), variable=setFFT, onvalue=1, offvalue=0, cursor='hand2')
 button2.grid(row=1, column=8, padx=30, pady=15)
 
 # RUN button
