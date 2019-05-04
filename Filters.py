@@ -421,6 +421,9 @@ class Filters:
                                     for i in range(h) for j in range(w)]) for v in range(w)] for u in range((h//2)+1)])
 
         fwd_mirror = [i[::-1] for i in fwd_trans[(h//2)-1:0:-1]]
+        for i in range(len(fwd_mirror)):
+            fwd_mirror[i] = np.append(np.array(fwd_mirror[i][len(fwd_mirror[i])-1]),
+                                      np.array(fwd_mirror[i][:len(fwd_mirror[i])-1]))
         mirror = array(fwd_mirror)
 
         a = np.concatenate((fwd_trans, mirror))
